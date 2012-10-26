@@ -74,7 +74,7 @@ www.grab-media.com
 
  Go to Grab-Media.com and click Sign-in.  Use the email and password credentials you created at account sign up to log in to the Publisher Report Portal. 
 
-= I would like to get more data than the report portal provides.  How can I get that?
+= I would like to get more data than the report portal provides.  How can I get that? =
 
 Grab can provide you automated, daily data exports that enable you to perform your own performance analyses.  Contact us and we can provide you the data that you need. 
 
