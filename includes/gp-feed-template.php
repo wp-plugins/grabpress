@@ -9,8 +9,7 @@
 	( function ( global, $ ) {
 
 		global.hasValidationErrors = function () {
-			var category =  $('#channel-select').val();
-			if((category == '') || ($("#provider-select :selected").length == 0)){
+			if(($("#channel-select :selected").length == 0) || ($("#provider-select :selected").length == 0)){
 				return true;
 			}
 			else {
@@ -28,7 +27,8 @@
 			}
 		}
 
-		global.deleteFeed = function(id){	
+		global.deleteFeed = function(id){
+			var bg_color = $('#tr-'+id+' td').css("background-color")
 			$('#tr-'+id+' td').css("background-color","red");	
 			var form = $('#form-'+id);
 			var action = $('#action-'+id);			
@@ -44,7 +44,7 @@
 					});
 
 				} else{					
-					$('#tr-'+id+' td').css("background-color","#FFE4C4");
+					$('#tr-'+id+' td').css("background-color", bg_color);
 					return false;
 				}
 		}
@@ -72,11 +72,13 @@
 				$('#btn-create-feed').removeAttr('disabled');
 				$('#btn-preview-feed').removeAttr('disabled');
 
+				/*
 				if( $( '#btn-create-feed' ).off ){
 					$( '#btn-create-feed' ).off('click');
 				}else{
 					$( '#btn-create-feed' ).unbind('click');
 				}
+				*/
 
 				if( $( '#btn-preview-feed' ).off ){
 					$( '#btn-preview-feed' ).off('click');
@@ -88,11 +90,13 @@
 				$( '#btn-create-feed' ).attr('disabled', 'disabled');
 				$( '#btn-preview-feed' ).attr('disabled', 'disabled');
 				
+				/*
 				if( $( '#btn-create-feed' ).off ){
 					$( '#btn-create-feed' ).off('click');
 				}else{
 					$( '#btn-create-feed' ).unbind('click');
 				}
+				*/
 
 				if( $( '#btn-preview-feed' ).off ){
 					$( '#btn-preview-feed' ).off('click');
@@ -102,6 +106,59 @@
 
 				$('.hide').hide();
 			}
+			
+		}
+
+		global.validateFeedName = function(edit){
+			var feed_date = $('#feed_date').val();
+			var name = $('#name').val();
+			if(name == ""){
+				$('#name').val(feed_date);
+				$("#form-create-feed").submit();
+			}
+			name = $.trim($('#name').val());
+			var regx_name = /\s/;		
+			var regx = /^\s*[a-zA-Z0-9,\s]+\s*$/;
+
+			var data = {
+				action: 'get_name_action',
+				name: name
+			};
+
+			// Update feed
+			if(edit === "update"){ 
+				if( (!regx.test(name)) || (regx_name.test(name)) ){
+					alert("The name entered contains special characters or starts/ends with spaces. Please enter a different name");
+				}else if(name.length < 6){					
+					alert("The name entered is less than 6 characters. Please enter a name between 6 and 14 characters");
+				}else {
+					$('#name').val(name);
+					$("#form-create-feed").submit();
+				}
+	
+			}else{  // Create feed
+				$.post(ajaxurl, data, function(response) {
+					//alert('Got this from the server: ' + response);
+				    if(response != "true"){
+					   	if((feed_date == name) && ((typeof edit === "undefined") || (edit===null))){
+							$('#dialog-name').val(name);
+							$('#dialog').dialog('open');
+				    	}else{
+							if( (!regx.test(name)) || (regx_name.test(name)) ){
+								alert("The name entered contains special characters or starts/ends with spaces. Please enter a different name");
+							}else if(name.length < 6){					
+								alert("The name entered is less than 6 characters. Please enter a name between 6 and 14 characters");
+							}else {
+								$('#name').val(name);
+								$("#form-create-feed").submit();
+							}				
+						}
+					}else{					
+						alert("The name entered is already in use. Please select a different name");
+					}				
+				});	
+			}
+
 		}
 
 	} )( window, jQuery );
@@ -120,6 +177,17 @@
 	var multiSelectOptionsCategories = {
 	  	 noneSelectedText:"Select categories",
 	  	 selectedText: "# of # selected"
+	};
+
+	var multiSelectOptionsChannels = {
+	  	 noneSelectedText:"Select Video Categories",
+	  	 selectedText:function(selectedCount, totalCount){
+			if (totalCount==selectedCount){
+	  	 		return "All Video Categories";
+	  	 	}else{
+	  	 		return selectedCount + " of " + totalCount + " Video Categories";
+	  	 	}
+	  	 }
 	};
 
 	jQuery(function($){
@@ -145,6 +213,11 @@
 		if($('#provider-select option:selected').length == 0){
 			$('#provider-select option').attr('selected', 'selected');
 		}
+
+		if($('#channel-select option:selected').length == 0){
+			$('#channel-select option').attr('selected', 'selected');
+		}
+
 		var category_options = $('#cat option');
 		for(var i=0;i<category_options.length; i++){
 			if($.inArray($(category_options[i]).val(),selectedCategories)>-1){
@@ -169,11 +242,9 @@
 		  $(".provider-select-update").multiselect(multiSelectOptions, {
 		  	 uncheckAll: function(e, ui){
 		  	 	id = this.id.replace('provider-select-update-','');
-		  	 	toggleButton(id);
 			 },
 			 checkAll: function(e, ui){
 		  	 	id = this.id.replace('provider-select-update-','');
-		  	 	toggleButton(id);
 			 }
 		   }).multiselectfilter();
 
@@ -199,15 +270,13 @@
 		  	header:false,
 		  	uncheckAll: function(e, ui){
 		  	 	id = this.id.replace('postcats-','');
-		  	 	toggleButton(id);
 			 },
 			 checkAll: function(e, ui){
 		  	 	id = this.id.replace('postcats-','');
-		  	 	toggleButton(id);
 			 }
 		  }).multiselectfilter();
 
-		  $(".channel-select").selectmenu();
+		  //$(".channel-select").selectmenu();
 		  $(".schedule-select").selectmenu();
 		  $(".limit-select").selectmenu();
 		  $(".author-select").selectmenu();
@@ -264,12 +333,76 @@
 
 		  $(".ui-selectmenu").click(function(){
 			    $(".ui-multiselect-menu").css("display", "none");
-			});
+			});		  
+
+		  $("#channel-select").multiselect(multiSelectOptionsChannels, {
+		  	 uncheckAll: function(e, ui){
+		  	 	
+			 },
+			 checkAll: function(e, ui){
+		  	 	
+			 }
+		   });
 
 		  $("#form-create-feed").change(doValidation);	
 		  //$("input").keyup(doValidation);
 		  //$("input").click(doValidation);
 		  //$("select").change(doValidation);
+
+		  $('#dialog').dialog({
+            autoOpen: false,
+            width: 400,
+            modal: true,
+            resizable: false,
+            buttons: {
+            	"Cancel": function() {
+                  $(this).dialog("close");
+                },
+                "Create Feed": function() {
+                  var name = $("#dialog-name").val();
+                  $("#name").val(name);
+                  validateFeedName("edit");
+                }
+            }
+          }); 
+
+	       $(".btn-update-feed").mousedown(function(event) {
+			   if( event.which == 2 ) {
+			   	  return false;
+			   	  id = this.id.replace('btn-update-','');
+          	      editFeed(id); 
+			   }
+		   });
+	      $('.btn-update-feed').bind("click",function(e){
+          	id = this.id.replace('btn-update-','');
+          	editFeed(id);
+	        return false;
+	      });
+
+          $('.btn-update-feed').bind("contextmenu",function(e){
+          	id = this.id.replace('btn-update-','');
+          	editFeed(id);
+	        return false;
+	      });
+
+	      $(".btn-preview-feed").mousedown(function(event) {
+			   if( event.which == 2 ) {
+			   	  return false;
+			   	  id = this.id.replace('btn-preview-feed-','');
+          	      previewFeed(id); 
+			   }
+		   });
+	      $('.btn-preview-feed').bind("click",function(e){
+          	id = this.id.replace('btn-preview-feed-','');
+          	previewFeed(id);
+	        return false;
+	      });
+
+          $('.btn-preview-feed').bind("contextmenu",function(e){
+          	id = this.id.replace('btn-preview-feed-','');
+          	previewFeed(id);
+	        return false;
+	      });
 
 	});
 
@@ -335,18 +468,34 @@
 					</td>					
 				</tr>
 				<tr valign="bottom">
+					<th scope="row">Feed Name</th>
+        		    <td>
+        		    	<?php $feed_date = date("YmdHis"); ?>	
+        		    	<input type="hidden" name="feed_date" value="<?php echo $name = isset($form["name"])? $form["name"] : $feed_date; ?>" id="feed_date" />
+						<input type="text" name="name" id="name" class="ui-autocomplete-input" value="<?php echo $name = isset($form["name"])? $form["name"] : $feed_date; ?>" maxlength="14" />
+						<span class="description">Feed Name</span>
+					</td>
+        		</tr>
+				<tr valign="bottom">
 					<th scope="row">Grab Video Categories<span class="asterisk">*</span></th>
 					<td>
-						<select  style="<?php GrabPress::outline_invalid() ?>" name="channel" id="channel-select" class="channel-select" style="width:500px" >
-							<option <?php  ( !array_key_exists( "channel", $form ) || !$form["channel"] )?'selected="selected"':"";?> value="">Choose One</option>
+						<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />
+						<select  style="<?php GrabPress::outline_invalid() ?>" name="channel[]" id="channel-select" class="channel-select multiselect" multiple="multiple" style="width:500px" >
+							<!--<option <?php  //( !array_key_exists( "channel", $form ) || !$form["channel"] )?'selected="selected"':"";?> value="">Choose One</option>-->							
 							<?php
+								if(is_array($form["channel"])){
+									$channels = $form["channel"];
+								}else{
+									$channels = explode( ",", $form["channel"] ); // Video categories chosen by the user
+								}
+								
 								$json = GrabPress::get_json( 'http://catalog.'.GrabPress::$environment.'.com/catalogs/1/categories' );
 								$list = json_decode( $json );
 								foreach ( $list as $record ) {
-									$category = $record -> category;
-									$name = $category -> name;
-									$id = $category -> id;
-									$selected = ( $name == $form["channel"] )?'selected="selected"':"";
+									$channel = $record -> category;
+									$name = $channel -> name;
+									$id = $channel -> id;
+									$selected = ( in_array( $name, $channels ) ) ? 'selected="selected"':"";
 									echo '<option value = "'.$name.'" '.$selected.'>'.$name.'</option>\n';
 								}
 							?>
@@ -358,7 +507,14 @@
 					<th scope="row">Keywords</th>
         		           	<td >
 						<input type="text" name="keywords_and" id="keyword-input" class="ui-autocomplete-input" value="<?php echo $form["keywords_and"];?>" maxlength="255" />
-						<span class="description">Enter search terms separated by spaces (e.g. <b>celebrity gossip</b>)</span>
+						<span class="description">Default search setting is 'all of these words'</span>
+					</td>
+        		</tr>
+        		<tr valign="bottom">
+					<th scope="row">Exclude these keywords</th>
+        		           	<td >
+						<input type="text" name="keywords_not" id="keywords_not" class="ui-autocomplete-input" value="<?php echo $form["keywords_not"];?>" />
+						<span class="description">Exclude these keywords</span>
 					</td>
         		</tr>
         		<tr valign="bottom">
@@ -382,7 +538,7 @@
 				<tr valign="bottom">
 					<td colspan="2" class="button-tip">						
 						<input type="button" onclick="previewVideos()" class="button-secondary" disabled="disabled" value="<?php isset($_GET['action'])=='edit-feed' ?_e( 'Preview Changes' ):  _e( 'Preview Feed' )  ?>" id="btn-preview-feed" />
-						<span class="hide preview-btn-text">Click to preview which videos will be autoposted from this feed</span>
+						<span class="hide preview-btn-text">Click here to sample the kinds of videos that will be auto posted by this feed in the future.</span>
 					</td>
 				</tr>
 				<tr>
@@ -435,7 +591,7 @@
 						<select name="limit" id="limit-select" class="limit-select" style="width:60px;" >
 							<?php 
 								for ( $o = 1; $o < 6; $o++ ) {
-									$selected = ( $o == $form["limit"] )?'selected="selected"':"";
+									$selected = ((isset($form["limit"])) && ( $o == $form["limit"] )) ?'selected="selected"':"";
 									echo "<option value = \"$o\" $selected>$o</option>\n";
 								} 
 							?>
@@ -462,7 +618,7 @@
 								foreach ( $blogusers as $user ) {
 									$author_name = $user->display_name;
 									$author_id = $user->ID;
-									$selected = ( $form["author"]==$author_id )?'selected="selected"':"";
+									$selected = ((isset($form["author"])) && ( $form["author"]==$author_id ) )?'selected="selected"':"";
 									echo '<option value = "'.$author_id.'" '.$selected.'>'.$author_name.'</option>\n';
 								}
 							?>
@@ -505,14 +661,11 @@
 				</tr>
 				<tr valign="bottom">					
 					<td class="button-tip" colspan="2">						
+						<?php $click = ( isset($_GET['action'])=='edit-feed' ) ? 'onclick="validateFeedName(\'update\')"' : 'onclick="validateFeedName()"' ?>
+						<input type="button" class="button-primary" disabled="disabled" value="<?php ( isset($_GET['action'])=='edit-feed' ) ? _e( 'Save Changes' ) : _e( 'Create Feed' ) ?>" id="btn-create-feed" <?php echo $click; ?>  />
+						<a id="reset-form" href="#">reset form</a>
+						<?php if(isset($_GET['action'])=='edit-feed'){ ?><a href="#" id="cancel-editing" >cancel editing</a><?php } ?>				
 						<span class="description" style="<?php GrabPress::outline_invalid() ?>color:red"> <?php echo GrabPress::$feed_message; ?> </span>
-						<input type="submit" class="button-primary" disabled="disabled" value="<?php ( isset($_GET['action'])=='edit-feed' ) ? _e( 'Save Changes' ) : _e( 'Create Feed' ) ?>" id="btn-create-feed" />
-										
-
-						<?php if(isset($_GET['action'])=='edit-feed'){ ?><a href="#" id="cancel-editing" >cancel editing</a><?php } ?>	
-						<a id="reset-form" href="#">reset form</a>	
-				
-
 					</td>
 				</tr>
 				</table>
@@ -522,6 +675,13 @@
 <span class="edit-form-text display-element" >Please use the form above to edit the settings of the feed marked "editing" below</span>
 <?php } ?>
 
+<div id="dialog" title="Name your feed">
+	<p style="color:red; font-size:14px;"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 0 0;"></span>Please Name Your Feed</p>
+	<p>You have not provided a custom feed name. You may keep it
+      as-is, but we recommend customizing it below.</p>
+	<input type="text" name="dialog-name" id="dialog-name" maxlength="14" />
+</div>
+
 <?php
 	$feeds = GrabPress::get_feeds();
 	$num_feeds = count( $feeds );
@@ -530,6 +690,8 @@
 			array( "form" => $_REQUEST,
 				"list_provider" => $list_provider,
 				"providers_total" => $providers_total,
+				"list_channels" => $list_channels,
+				"channels_total" => $channels_total,
 				"blogusers" => $blogusers 
 			)
 		); 
