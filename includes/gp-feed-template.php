@@ -118,7 +118,7 @@
 			}
 			name = $.trim($('#name').val());
 			var regx_name = /\s/;		
-			var regx = /^\s*[a-zA-Z0-9,\s]+\s*$/;
+			var regx = /^[a-zA-Z0-9,\s]+$/;
 
 			var data = {
 				action: 'get_name_action',
@@ -127,7 +127,7 @@
 
 			// Update feed
 			if(edit === "update"){ 
-				if( (!regx.test(name)) || (regx_name.test(name)) ){
+				if(!regx.test(name)){
 					alert("The name entered contains special characters or starts/ends with spaces. Please enter a different name");
 				}else if(name.length < 6){					
 					alert("The name entered is less than 6 characters. Please enter a name between 6 and 14 characters");
@@ -144,7 +144,7 @@
 							$('#dialog-name').val(name);
 							$('#dialog').dialog('open');
 				    	}else{
-							if( (!regx.test(name)) || (regx_name.test(name)) ){
+							if(!regx.test(name)){
 								alert("The name entered contains special characters or starts/ends with spaces. Please enter a different name");
 							}else if(name.length < 6){					
 								alert("The name entered is less than 6 characters. Please enter a name between 6 and 14 characters");
@@ -309,14 +309,36 @@
 
 			$.post(ajaxurl, data, function(response) {
 				//alert('Got this from the server: ' + response);
-				var noun = 'feed';
+				var substr = response.split('-');
+				var num_active_feeds = substr[0];
+				var num_feeds =  substr[1];
+				var noun = 'feed';	
+				var autoposter_status = 'ON';
+				var feeds_status = 'active';		
 
-				if( response > 1 || response == 0){
+				/*
+				if( (num_active_feeds == 1) || (num_feeds == 1) ){
+					noun = 'feed';	
+				}else */
+				if(num_active_feeds == 0){
+					var autoposter_status = 'OFF';
+					var feeds_status = 'inactive';
+					response = '';					
+					num_active_feeds = num_feeds;
+					if(num_feeds > 1){
+						noun = noun + 's';
+					}					
+				}else if( (num_active_feeds == 1) ){
+					noun = 'feed';	
+				}else{
 					noun = noun + 's';
 				}
 				
-				$('#num-active-feeds').text(response);	
+				$('#num-active-feeds').text(num_active_feeds);	
 				$('#noun-active-feeds').text(noun);
+
+				$('#autoposter-status').text(autoposter_status);
+				$('#feeds-status').text(feeds_status);
 			});
 
 
@@ -471,32 +493,32 @@
 					<th scope="row">Feed Name</th>
         		    <td>
         		    	<?php $feed_date = date("YmdHis"); ?>	
-        		    	<input type="hidden" name="feed_date" value="<?php echo $name = isset($form["name"])? $form["name"] : $feed_date; ?>" id="feed_date" />
-						<input type="text" name="name" id="name" class="ui-autocomplete-input" value="<?php echo $name = isset($form["name"])? $form["name"] : $feed_date; ?>" maxlength="14" />
-						<span class="description">Feed Name</span>
+        		    	<input type="hidden" name="feed_date" value="<?php echo $feed_date = isset($form["feed_date"])? $form["feed_date"] : $feed_date; ?>" id="feed_date" />
+        		    	<?php $name = isset($form["name"])? urldecode($form["name"]) : $feed_date; ?>
+						<input type="text" name="name" id="name" class="ui-autocomplete-input" value="<?php echo $name; ?>" maxlength="14" />
+						<span clas="description">Feed Name</span>
 					</td>
         		</tr>
 				<tr valign="bottom">
 					<th scope="row">Grab Video Categories<span class="asterisk">*</span></th>
 					<td>
-						<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />
+						<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />					
 						<select  style="<?php GrabPress::outline_invalid() ?>" name="channel[]" id="channel-select" class="channel-select multiselect" multiple="multiple" style="width:500px" >
 							<!--<option <?php  //( !array_key_exists( "channel", $form ) || !$form["channel"] )?'selected="selected"':"";?> value="">Choose One</option>-->							
-							<?php
+							<?php								
 								if(is_array($form["channel"])){
 									$channels = $form["channel"];
 								}else{
-									$channels = explode( ",", $form["channel"] ); // Video categories chosen by the user
+									$channels = explode( ",", rawurldecode($form["channel"])); // Video categories chosen by the user
 								}
 								
-								$json = GrabPress::get_json( 'http://catalog.'.GrabPress::$environment.'.com/catalogs/1/categories' );
-								$list = json_decode( $json );
+								$list = GrabPress::get_channels();
 								foreach ( $list as $record ) {
 									$channel = $record -> category;
 									$name = $channel -> name;
 									$id = $channel -> id;
 									$selected = ( in_array( $name, $channels ) ) ? 'selected="selected"':"";
-									echo '<option value = "'.$name.'" '.$selected.'>'.$name.'</option>\n';
+									echo '<option value = "'.$name.'" '.$selected.'>'.$name.'</option>';
 								}
 							?>
 						</select>
@@ -513,8 +535,22 @@
         		<tr valign="bottom">
 					<th scope="row">Exclude these keywords</th>
         		           	<td >
-						<input type="text" name="keywords_not" id="keywords_not" class="ui-autocomplete-input" value="<?php echo $form["keywords_not"];?>" />
+						<input type="text" name="keywords_not" id="keywords_not" value="<?php echo $form["keywords_not"];?>" />						
 						<span class="description">Exclude these keywords</span>
+					</td>
+        		</tr>
+        		<tr valign="bottom">
+					<th scope="row">Any of the keywords</th>
+        		           	<td >
+						<input type="text" name="keywords_or" id="keyword-input" class="ui-autocomplete-input" value="<?php echo $form["keywords_or"];?>" maxlength="255" />
+						<span class="description">Any of these keywords</span>
+					</td>
+        		</tr>
+        		<tr valign="bottom">
+					<th scope="row">Exact phrase</th>
+        		        <td >
+						<input type="text" name="keywords_phrase" id="keyword-input" class="ui-autocomplete-input" value="<?php echo $form["keywords_phrase"];?>" maxlength="255" />
+						<span class="description">Exact phrase</span>
 					</td>
         		</tr>
         		<tr valign="bottom">
@@ -523,6 +559,13 @@
 							<input type="hidden" name="providers_total" value="<?php echo $providers_total; ?>" class="providers_total" id="providers_total" />
 							<select name="provider[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php GrabPress::outline_invalid() ?>" onchange="doValidation()" >
 							<?php
+								/*
+								if(is_array($form["list_provider"])){
+									$list_provider = $form["list_provider"];
+								}else{
+									$list_provider = explode( ",", $form["list_provider"] ); // Video categories chosen by the user
+								}
+								*/
 								foreach ( $list_provider as $record_provider ) {
 									$provider = $record_provider->provider;
 									$provider_name = $provider->name;
