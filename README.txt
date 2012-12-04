@@ -153,6 +153,7 @@ We hope to allow users to edit the layout / posting template in future updates o
 
 = 2.0.0 =
 *Features:*
+
  * AUTO-334: As a publisher, I want the embed in auto-posted content to use Grab's JavaScript embed.
  * AUTO-249: As an editor, I want to execute a simple or advanced search against the Grab-Media Catalog, to find relevant videos for a post.
  * AUTO-250: As a WordPress publisher, I want to post a single video to my blog from the Video Catalog search results page.
@@ -160,6 +161,7 @@ We hope to allow users to edit the layout / posting template in future updates o
  
 
 *Bug Fixes:*
+
  * AUTO-408: When I create a feed using a category with spaces, I do not reveieve any posts.
  * AUTO-405: After installing the GrabPress plug-in, my media tab from the admin menu disappears.
 
