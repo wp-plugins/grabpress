@@ -19,6 +19,7 @@
 
 		global.previewVideos = function () {
 			var errors = hasValidationErrors();
+
 			if(!errors){
 				$("#form-create-feed input[name=action]").val("preview-feed");
 				$("#form-create-feed").submit();
@@ -49,18 +50,6 @@
 				}
 		}
 		global.selectedCategories = <?php echo json_encode( $form["category"] );?>;
-		<?php if(isset($_GET["feed_id"])) { ?>
-			global.previewFeed = function(id) {			
-			    var form = jQuery('#form-'+id);
-			    var action = jQuery('#action-'+id);
-			    action.val("edit-feed");
-			    form.submit();
-			}
-			<?php }else{ ?>
-			global.previewFeed = function(id) {			
-				window.location = "admin.php?page=autoposter&action=preview-feed&feed_id="+id;
-			}
-		<?php } ?>		
 
 		global.editFeed = function(id) {
 			window.location = "admin.php?page=autoposter&action=edit-feed&feed_id="+id;
@@ -72,14 +61,6 @@
 				$('#btn-create-feed').removeAttr('disabled');
 				$('#btn-preview-feed').removeAttr('disabled');
 
-				/*
-				if( $( '#btn-create-feed' ).off ){
-					$( '#btn-create-feed' ).off('click');
-				}else{
-					$( '#btn-create-feed' ).unbind('click');
-				}
-				*/
-
 				if( $( '#btn-preview-feed' ).off ){
 					$( '#btn-preview-feed' ).off('click');
 				}else{
@@ -89,14 +70,6 @@
 			}else{
 				$( '#btn-create-feed' ).attr('disabled', 'disabled');
 				$( '#btn-preview-feed' ).attr('disabled', 'disabled');
-				
-				/*
-				if( $( '#btn-create-feed' ).off ){
-					$( '#btn-create-feed' ).off('click');
-				}else{
-					$( '#btn-create-feed' ).unbind('click');
-				}
-				*/
 
 				if( $( '#btn-preview-feed' ).off ){
 					$( '#btn-preview-feed' ).off('click');
@@ -407,25 +380,6 @@
 	        return false;
 	      });
 
-	      $(".btn-preview-feed").mousedown(function(event) {
-			   if( event.which == 2 ) {
-			   	  return false;
-			   	  id = this.id.replace('btn-preview-feed-','');
-          	      previewFeed(id); 
-			   }
-		   });
-	      $('.btn-preview-feed').bind("click",function(e){
-          	id = this.id.replace('btn-preview-feed-','');
-          	previewFeed(id);
-	        return false;
-	      });
-
-          $('.btn-preview-feed').bind("contextmenu",function(e){
-          	id = this.id.replace('btn-preview-feed-','');
-          	previewFeed(id);
-	        return false;
-	      });
-
 	});
 
 	jQuery(window).load(function () {
@@ -496,7 +450,7 @@
         		    	<input type="hidden" name="feed_date" value="<?php echo $feed_date = isset($form["feed_date"])? $form["feed_date"] : $feed_date; ?>" id="feed_date" />
         		    	<?php $name = isset($form["name"])? urldecode($form["name"]) : $feed_date; ?>
 						<input type="text" name="name" id="name" class="ui-autocomplete-input" value="<?php echo $name; ?>" maxlength="14" />
-						<span clas="description">Feed Name</span>
+						<span class="description">A unique name of 6-14 characters. We encourage customizing it.</span>
 					</td>
         		</tr>
 				<tr valign="bottom">
@@ -504,7 +458,6 @@
 					<td>
 						<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />					
 						<select  style="<?php GrabPress::outline_invalid() ?>" name="channel[]" id="channel-select" class="channel-select multiselect" multiple="multiple" style="width:500px" >
-							<!--<option <?php  //( !array_key_exists( "channel", $form ) || !$form["channel"] )?'selected="selected"':"";?> value="">Choose One</option>-->							
 							<?php								
 								if(is_array($form["channel"])){
 									$channels = $form["channel"];
@@ -512,8 +465,7 @@
 									$channels = explode( ",", rawurldecode($form["channel"])); // Video categories chosen by the user
 								}
 								
-								$list = GrabPress::get_channels();
-								foreach ( $list as $record ) {
+								foreach ( $list_channels as $record ) {
 									$channel = $record -> category;
 									$name = $channel -> name;
 									$id = $channel -> id;
@@ -528,7 +480,7 @@
 	        	<tr valign="bottom">
 					<th scope="row">Keywords</th>
         		           	<td >
-						<input type="text" name="keywords_and" id="keyword-input" class="ui-autocomplete-input" value="<?php echo $form["keywords_and"];?>" maxlength="255" />
+						<input type="text" name="keywords_and" id="keyword-input" class="ui-autocomplete-input" value="<?php echo $form['keywords_and']; ?>" maxlength="255" />
 						<span class="description">Default search setting is 'all of these words'</span>
 					</td>
         		</tr>
@@ -559,14 +511,7 @@
 							<input type="hidden" name="providers_total" value="<?php echo $providers_total; ?>" class="providers_total" id="providers_total" />
 							<select name="provider[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php GrabPress::outline_invalid() ?>" onchange="doValidation()" >
 							<?php
-								/*
-								if(is_array($form["list_provider"])){
-									$list_provider = $form["list_provider"];
-								}else{
-									$list_provider = explode( ",", $form["list_provider"] ); // Video categories chosen by the user
-								}
-								*/
-								foreach ( $list_provider as $record_provider ) {
+								foreach ( $list_providers as $record_provider ) {
 									$provider = $record_provider->provider;
 									$provider_name = $provider->name;
 									$provider_id = $provider->id;
@@ -599,14 +544,14 @@
 											$times = array( '15 mins', '30  mins', '45 mins', '01 hr', '02 hrs', '06 hrs', '12 hrs', '01 day', '02 days', '03 days' );
 										}
 										else {
-											$times = array( '12 hrs', '01 day', '02 days', '03 days' );
+											$times = array( '06 hrs', '12 hrs', '01 day', '02 days', '03 days' );
 										}	
 
 										if ( GrabPress::$environment == 'grabqa' ) {												
 											$values = array( 15,  30,  45, 60, 120, 360, 720, 1440, 2880, 4320 );
 										}
 										else {
-											$values = array( 720, 1440, 2880, 4320 );
+											$values = array( 360, 720, 1440, 2880, 4320 );
 										}
 
 										if(!isset($form["schedule"])){
@@ -731,7 +676,7 @@
 	if($num_feeds > 0 ){
 		echo GrabPress::fetch('includes/gp-manage-feeds.php',
 			array( "form" => $_REQUEST,
-				"list_provider" => $list_provider,
+				"list_providers" => $list_providers,
 				"providers_total" => $providers_total,
 				"list_channels" => $list_channels,
 				"channels_total" => $channels_total,

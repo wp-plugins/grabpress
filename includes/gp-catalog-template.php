@@ -1,6 +1,5 @@
 <?php 
-	$list_provider = GrabPress::get_providers();
-	$providers_total = count( $list_provider );
+	$providers_total = count( $list_providers );
 	if(isset($form['provider'])){
 		$providers = isset($form['provider']) ? join($form['provider'], ","): "";
 
@@ -14,18 +13,16 @@
 		$providers = "";
 	}
 
-	$list_channels = GrabPress::get_channels();
 	$channels_total = count( $list_channels );
 
 	if(isset($form['channel'])){
 		$channels = isset($form['channel']) ? join($form['channel'], ","): "";		
-		$channel_total = count(GrabPress::get_channels());
 
-		if(($channel_total == count($form['channel'])) || in_array("", $form['channel'])){
+		if(($channels_total == count($form['channel'])) || in_array("", $form['channel'])){
 			$channel_text = "All Video Categories";
 			$channels = "";
 		}else{
-			$channel_text = count($form['channel'])." of ".$channel_total." selected";
+			$channel_text = count($form['channel'])." of ".$channels_total." selected";
 		}
 	}else{
 		$channels = "";
@@ -47,7 +44,9 @@
 		}
 		$adv_search_params["providers"] = $providers;
 		$adv_search_params["categories"] = $channels;
-		$url_catalog = GrabPress::generate_catalog_url($adv_search_params, false);
+		$adv_search_params["sort_by"] = $form["sort_by"];
+
+		$url_catalog = GrabPress::generate_catalog_url($adv_search_params);
 
 		$json_preview = GrabPress::get_json($url_catalog);
 
@@ -55,18 +54,17 @@
 		
 		if(empty($list_feeds["results"])){
 			GrabPress::$error = 'It appears we do not have any content matching your search criteria. Please modify your settings until you see the kind of videos you want in your feed';
-		}
+		}	
 	}
-		$id = GrabPress::get_connector_id();
-		$player_json = GrabPress::api_call( 'GET',  '/connectors/'.$id.'/?api_key='.GrabPress::$api_key );
-		$player_data = json_decode( $player_json, true );
-		$player_id = isset($player_data["connector"]["ctp_embed_id"]) ? $player_data["connector"]["ctp_embed_id"] : '';	
 
-	
+	$id = GrabPress::get_connector_id();
+	$player_json = GrabPress::api_call( 'GET',  '/connectors/'.$id.'/?api_key='.GrabPress::$api_key );
+	$player_data = json_decode( $player_json, true );
+	$player_id = isset($player_data["connector"]["ctp_embed_id"]) ? $player_data["connector"]["ctp_embed_id"] : '';	
 ?>
 <form method="post" action="" id="form-catalog-page">
 	<input type="hidden" id="action-catalog" name="action" value="catalog-search" />
-	<input type="hidden" id="list_provider" name="list_provider" value="<?php echo $list_provider; ?>" />
+	<input type="hidden" id="list_provider" name="list_provider" value="<?php echo (string)$list_providers; ?>" />
 	<input type="hidden" name="pre_content" value="<?php echo 'Content'; ?>"  id="pre_content" />
 	<input type="hidden" name="player_id" value="<?php echo $player_id = isset($player_id) ? $player_id : '' ; ?>"  id="player_id" />
 	<input type="hidden" name="bloginfo" value="<?php echo get_bloginfo('url'); ?>"  id="bloginfo" />
@@ -78,40 +76,38 @@
 	<input type="hidden" id="keywords_not" name="keywords_not" value="<?php echo $keywords_not = isset($keywords_not) ? $keywords_not : ''; ?>" />
 	<input type="hidden" id="keywords_or" name="keywords_or" value="<?php echo $keywords_or = isset($keywords_or) ? $keywords_or : ''; ?>" />
 	<input type="hidden" id="keywords_phrase" name="keywords_phrase" value="<?php echo $keywords_phrase = isset($keywords_phrase) ? $keywords_phrase : ''; ?>" />
+	<input type="hidden" name="post_title" value=""  id="post_title" />
 	
 <div class="wrap" >
 			<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg"/>
 			<h2>GrabPress: Find a Video in our Catalog</h2>
 			<p>Grab video content delivered fresh to your blog <a href="#" onclick='return false;' id="how-it-works">how it works</a></p>
 	<fieldset id="preview-feed">
-	<legend>Search Videos</legend>		
-
+	<legend>Preview Feed</legend>
 		<div class="label-tile-one-column">
-			<span class="preview-text-catalog"><b>Keywords: </b><input name="keywords" id="keywords" type="text" value="<?php echo $keywords = isset($form['keywords']) ? htmlentities(stripslashes($form['keywords']), ENT_QUOTES)  : '' ?>" maxlength="255" /></span>
+			<span class="preview-text-catalog"><b>Keywords: </b><input name="keywords" id="keywords" type="text" value="<?php echo $keywords = isset($form['keywords']) ? $form['keywords'] : '' ?>" maxlength="255" /></span>
 			<a href="#" id="help">help</a>
-		</div>	
+		</div>
 		
 		<div class="label-tile">
 			<div class="tile-left">
 				<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />
-				<span class="preview-text-catalog"><b>Grab Video Categories: </b>	
+				<span class="preview-text-catalog"><b>Grab Video Categories: </b>
 				</span>
 			</div>
 			<div class="tile-right">
-				<?php 				
+				<?php
 					if(isset($form["channel"])){
 						if(is_array($form["channel"])){
 							$channels = $form["channel"];
 						}else{
 							$channels = explode( ",", $form["channel"] ); // Video categories chosen by the user
 						}
-					}					
-					$list = GrabPress::get_channels();		
-				?>		
+					}
+				?>
 				<select name="channel[]" id="channel-select" class="channel-select multiselect" multiple="multiple" style="width:500px" >
-					<!--<option <?php  //( !array_key_exists( "channel", $form ) || !$form["channel"] )?'selected="selected"':"";?> value="">Choose One</option>-->							
-					<?php	
-						foreach ( $list as $record ) {
+					<?php
+						foreach ( $list_channels as $record ) {
 							$channel = $record -> category;
 							$name = $channel -> name;
 							$id = $channel -> id;							
@@ -131,7 +127,7 @@
 			<div class="tile-right">
 				<select name="provider[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php GrabPress::outline_invalid() ?>" onchange="doValidation()" >
 				<?php			
-					foreach ( $list_provider as $record_provider ) {
+					foreach ( $list_providers as $record_provider ) {
 						$provider = $record_provider->provider;
 						$provider_name = $provider->name;
 						$provider_id = $provider->id;
@@ -162,40 +158,40 @@
 			</div>
 		</div>
 		<br/><br/>	
+		
+
 	<?php
 		if(isset($form["keywords"])){
+	?>
+	 <div class="label-tile-one-column">
+               Sort by: 
+               <?php  
+                       $created_checked = ((isset($form["sort_by"])) && ($form["sort_by"]!="relevance")) ? 'checked="checked";':"";
+                       $relevance_checked = ((isset($form["sort_by"])) &&($form["sort_by"]=="relevance")) ?'checked="checked";':"";
+               ?>
+               <input type="radio" class="sort_by" name="sort_by" value="created_at" <?php echo $created_checked;?> /> Date
+               <input type="radio" class="sort_by" name="sort_by" value="relevance" <?php echo $relevance_checked;?> /> Relevance<br>
+       </div>
+	<?php
 			foreach ($list_feeds["results"] as $result) {
 	?>
-	<div data-id="<?php echo $result['video']['video_product_id']; ?>" class="result-tile">		
+	<div data-id="<?php echo $result['video']['video_product_id']; ?>" class="result-tile" id="video-<?php echo $result['video']['id']; ?>">		
 		<div class="tile-left">
 			<img src="<?php echo $result['video']['media_assets'][0]['url']; ?>" height="72px" width="123px" onclick="grabModal.play('<?php echo $result["video"]["guid"]; ?>')">
+		</div>
+		<div class="tile-right">
+			<h2 class="video_title" id="video-title-<?php echo $result['video']['id']; ?>">
+			<?php echo $result["video"]["title"]; ?>	
+			</h2>
+			<p class="video_summary">		
+				<?php echo $result["video"]["summary"];?>			
+			</p>
 			<p class="video_date">
 				<?php $date = new DateTime( $result["video"]["created_at"] );
 				$stamp = $date->format('m/d/Y') ?>
-			<span><?php echo $stamp; ?></span>
-			</p>
-			<p class="video_logo">
-			<span>SOURCE: <?php echo $result["video"]["provider"]["name"]; ?></span>
-			</p>
-		</div>
-		<div class="tile-right">			
-			<h2 class="video_title" onclick="grabModal.play('<?php echo $result["video"]["guid"]; ?>')">
-			<?php if(strlen($result["video"]["title"]) > 60) {
-					echo substr($result["video"]["title"], 0, 57) . '...';}
-				  else{
-					echo $result["video"]["title"];	  	
-			}
-			?>	
-			</h2>
-			<p class="video_summary">		
-				<?php if(strlen($result["video"]["summary"]) > 100) {
-					echo substr($result["video"]["summary"], 0, 97) . '...';}
-				else{
-				echo $result["video"]["summary"];	  	
-				}
-				?>			
-</p>
-			<input type="button" class="button-primary btn-create-feed-single" value="<?php _e( 'Create Post' ) ?>" id="btn-create-feed-single-<?php echo $result['video']['id']; ?>" />
+			<span><?php echo $stamp; ?>&nbsp;&nbsp;<span><span>SOURCE: <?php echo $result["video"]["provider"]["name"]; ?></span>
+			<input type="button" class="button-primary btn-create-feed-single" value="<?php _e( 'Create Post' ) ?>" id="btn-create-feed-single-<?php echo $result['video']['id']; ?>" /><input type="button" class="button-primary" onclick="grabModal.play('<?php echo $result["video"]["guid"]; ?>')" value="Watch Video" /></p>
+			
 		</div>
 	</div>
 	<?php
@@ -236,7 +232,7 @@
 					$( '#btn-preview-feed' ).off('click');
 				}else{
 					$( '#btn-preview-feed' ).unbind('click');
-				}				
+				}
 
 				$('.hide').hide();
 			}
@@ -346,22 +342,29 @@
 		    form.attr("action", "admin.php?page=autoposter");
 		    form.submit();
 		});
+		$(".sort_by").change(function(e){
+			var form = jQuery('#form-catalog-page');
+			form.submit();
+		});
+
 
 	   	$('.btn-create-feed-single').bind('click', function(e){
 		    var form = $('#form-catalog-page');
 		    var ctp_player_id = $('#player_id').val();
 		    var bloginfo = $('#bloginfo').val();
-		    var video_id = this.id.replace('btn-create-feed-single-','');
+		    var v_id = this.id.replace('btn-create-feed-single-','');
 		    var pre_content2 = $('#pre_content2').val();
 		    var post_id = $('#post_id').val();
 
 		    var data = {
 				action: 'get_mrss_format',
-				video_id: video_id
+				format : 'post',
+				video_id: v_id
 			};
-
+			
 			$.post(ajaxurl, data, function(response) {
-				//alert('Got this from the server: ' + response);
+				var video_title = $.trim($('#video-title-' + v_id).text());
+				$('#post_title').val(video_title);	
 				var content = response.replace(/1825613/g, ctp_player_id);
 				if(pre_content2 != ""){
 					content = pre_content2 + "<br/><br/>" + content;
@@ -370,11 +373,11 @@
 				if(post_id != ""){
 					$('#post_ID').val(post_id);	
 				}
-				$('#post_ID').val(post_id);
 						
 			    form.attr("ACTION", bloginfo+"/wp-admin/post-new.php");
 			    form.submit();				
-			});		  
+			});	
+			  
 
 		});	
 
@@ -389,6 +392,7 @@
 	   	$('#clear-search').bind('click', function(e){
 	   		window.location = "admin.php?page=catalog";		    
 		});
+		$(".video_summary").ellipsis(2, true, "more", "less");
 
 	});
 
