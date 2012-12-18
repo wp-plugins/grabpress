@@ -161,7 +161,7 @@ We hope to allow users to edit the layout / posting template in future updates o
 
 **NOTICE: WordPress 3.5 is NOT supported at this time**
 
-= 2.0.1 =
+= 2.0.2 =
 
  * Hot fix for an issue with player environments
 
