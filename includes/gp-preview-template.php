@@ -1,19 +1,41 @@
 <?php 
 	$providers = join($provider, ",");
-	$provider_total = count(GrabPress::get_providers());
+	$provider_total = count($list_providers);
 	if(($provider_total == count($provider)) || in_array("", $provider)){
 		$provider_text = "All Providers";
+		$providers = "";
 	}else{
 		$provider_text = count($provider)." of ".$provider_total." selected";
 	}
-	$json_preview = GrabPress::get_json('http://catalog.'.GrabPress::$environment
-		.'.com/catalogs/1/videos/search.json?keywords_and='.urlencode($keywords_and)
-		.'&categories='.urlencode($channel).'&order=DESC&order_by=created_at&providers='.urlencode($providers));
+
+	$channels = rawurlencode(join($channel, ","));
+	$channel_total = count($list_channels);
+	if(($channel_total == count($channel)) || in_array("", $channel)){
+		$channel_text = "All Video Categories";
+		$channels = "";
+	}else{
+		$channel_text = count($channel)." of ".$channel_total." selected";
+	}
+
+
+   $url_catalog = GrabPress::generate_catalog_url(array(
+   		"keywords_and" => $keywords_and,
+   		"keywords_not" => $keywords_not,
+   		"keywords_or" => $keywords_or,
+   		"keywords_phrase" => $keywords_phrase,
+   		"providers" => $providers,
+   		"categories" => $channels
+   	));
+
+   //$url_catalog = GrabPress::_escape_params_template($url_catalog);
+
+	$json_preview = GrabPress::get_json($url_catalog);
 	$list_feeds = json_decode($json_preview, true);
 	
 	if(empty($list_feeds["results"])){
 		GrabPress::$error = 'It appears we do not have any content matching your search criteria. Please <a href="#" class="close-preview">modify your settings</a> until you see the kind of videos you want in your feed';
 	}
+
 	
 ?>
 <form method="post" action="" id="preview-feed">
@@ -28,16 +50,26 @@
 		<input type="hidden" name="feed_id" value="<?php echo $feed_id; ?>"  />
 		<?php } ?>
 		<input type="hidden" name="referer" value="<?php echo $referer; ?>"  />
-		<input type="hidden" name="active" value="<?php echo $active; ?>" id="active" />
+		<input type="hidden" name="active" value="<?php if(isset($active)){ echo $active;} ?>" id="active" />
+		<input type="hidden" name="name" value="<?php echo $name; ?>" id="name" />
+		<input type="hidden" name="feed_date" value="<?php echo $feed_date; ?>" id="feed_date" />		
 		<input type="hidden" name="channel" value="<?php echo $channel; ?>" id="channel" />
-		<input type="hidden" name="keywords_and" value="<?php echo $keywords_and; ?>" id="keywords_and" />	
 		<input type="hidden" name="limit" value="<?php echo $limit; ?>" id="limit" />
 		<input type="hidden" name="schedule" value="<?php echo $schedule; ?>" id="schedule" />
 		<input type="hidden" name="publish" value="<?php echo $publish; ?>" id="publish" />
 		<input type="hidden" name="click_to_play" value="<?php echo $click_to_play; ?>" id="click_to_play" />
-		<input type="hidden" name="author" value="<?php echo $author; ?>" id="author" />	
+		<input type="hidden" name="author" value="<?php echo $author; ?>" id="author" />
+		<input type="hidden" name="keywords_and" value="<?php echo $keywords_and; ?>" id="keywords_and" />
+		<input type="hidden" name="keywords_not" value="<?php echo $keywords_not; ?>" id="keywords_not" />
+		<input type="hidden" id="keywords_or" name="keywords_or" value="<?php echo $keywords_or; ?>" />
+	    <input type="hidden" id="keywords_phrase" name="keywords_phrase" value="<?php echo $keywords_phrase; ?>" />
 		<select name="category[]" style="display:none;" multiple="multiple	">
-			<?php foreach($category as $cat){ ?>
+			<?php foreach($category as $categ){ ?>
+				<option value="<?php echo $categ;?>" selected="selected"/>
+			<?php } ?>
+		</select>		
+		<select name="channel[]" style="display:none;" multiple="multiple	">
+			<?php foreach($channel as $cat){ ?>
 				<option value="<?php echo $cat;?>" selected="selected"/>
 			<?php } ?>
 		</select>
@@ -48,11 +80,14 @@
 		</select>
 		
 		<input type="button" value="Close Preview" class="close-preview" id="close-preview" >
-		<span class="preview-text"><b>Video Channel: </b><?php echo $channel; ?></span><br/>
-		<span class="preview-text"><b>Keywords: </b><?php echo $keywords_and; ?></span><br/>
+		<span class="preview-text"><b>Video Channel: </b><?php echo $channel_text; ?></span><br/>
+		<span class="preview-text"><b>All Keywords: </b><?php echo $keywords_and; ?></span><br/>
+		<span class="preview-text"><b>Any Keywords: </b><?php echo $keywords_or; ?></span><br/>
+		<span class="preview-text"><b>Keywords excluded: </b><?php echo $keywords_not; ?></span><br/>
+		<span class="preview-text"><b>Exact phrase: </b><?php echo $keywords_phrase; ?></span><br/>
 		<span class="preview-text"><b>Providers: </b><?php echo $provider_text; ?></span><br/>
-		<span class="preview-text">This preview shows the kinds of videos that will be auto-posted for you when they arrive in the Grab Media catalog in the future. If you want to get the embed code for one of these videos to feature in one of your posts, log in to <a href="http://grab-media.com/premium-videos">grab-media.com/premium-videos</a> and find the video you are looking for, and grab the embed code.</span><br/><br/>	
-
+		<span class="preview-text">This preview shows the kinds of videos that will be auto-posted for you when they arrive in the Grab Media catalog in the future. If you want to get the embed code for one of these videos to feature in one of your posts, log in to <a href="http://grab-media.com/premium-videos">grab-media.com/premium-videos</a> and find the video you are looking for, and grab the embed code.</span><br/><br/>  	
+	
 	<?php
 		foreach ($list_feeds["results"] as $result) {
 	?>
@@ -96,6 +131,7 @@ if(!window.grabModal){
 	jQuery(function(){	
 		//var feed_id = <?php echo $feed_id  = isset($_GET["feed_id"]) ? $_GET["feed_id"] : "undefined"; ?>;
 		var feed_action = '<?php echo $action  = isset($_GET["action"]) ? $_GET["action"] : "default"; ?>';
+		
 		if(feed_action == "preview-feed"){
 		  	jQuery(".close-preview").click(function() {		  
 		  		window.location = "admin.php?page=autoposter";
