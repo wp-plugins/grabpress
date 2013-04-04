@@ -3,7 +3,7 @@ Contributors: grabmedia
 Tags: video, grab, autoposter, grab press, grab media, grab-media, grab networks, video catalog, media, video feed, video player, video content, professional video, ad revenue
 Requires at least: 3.4   
 Tested up to: 3.5  
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -150,6 +150,9 @@ We hope to allow users to edit the layout / posting template in future updates o
 5. Video results are automatically posted to your Blog.
 
 == Changelog ==  
+
+= 2.2.2 =
+ * Various bux fixes.
 
 = 2.2.1 =
  * Introducing: The GrabPress shortcode!
