@@ -1,403 +1,26 @@
-<!--<form method="post" action="" id="form-create-feed">-->
+<?php 
+
+$is_edit = $form["action"] == "edit-feed" || $form["action"] == "modify" ;
+
+?>
 <div class="wrap">
 	<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg"/>
 	<h2>GrabPress: Autopost Videos by Category and Keywords</h2>
 	<p>Feed your blog with fresh video content.</p>
-		<fieldset id="create-form" class="<?php echo isset($_GET['action'])=='edit-feed' ? 'edit-mode':''?>">
-		<legend><?php echo isset($_GET['action'])=='edit-feed' ? 'Edit':'Create'?> Feed</legend>
-	<script type="text/javascript">
-	( function ( global, $ ) {
 
-		global.hasValidationErrors = function () {
-			if(($("#channel-select :selected").length == 0) || ($("#provider-select :selected").length == 0)){
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-
-		global.previewVideos = function () {
-			var errors = hasValidationErrors();
-
-			if(!errors){
-				$("#form-create-feed input[name=action]").val("preview-feed");
-				$("#form-create-feed").submit();
-			}else{
-				alert(errors);
-			}
-		}
-
-		global.deleteFeed = function(id){
-			var bg_color = $('#tr-'+id+' td').css("background-color")
-			$('#tr-'+id+' td').css("background-color","red");	
-			var form = $('#form-'+id);
-			var action = $('#action-'+id);			
-			var answer = confirm('Are you sure you want to delete this feed? You will no longer receive videos based on its settings. Existing video posts will not be deleted.');
-				if(answer){					
-				    var data = {
-						action: 'delete_action',
-						feed_id: id
-					};
-
-					$.post(ajaxurl, data, function(response) {
-						window.location = "admin.php?page=autoposter";
-					});
-
-				} else{					
-					$('#tr-'+id+' td').css("background-color", bg_color);
-					return false;
-				}
-		}
-		global.selectedCategories = <?php echo json_encode( $form["category"] );?>;
-
-		global.editFeed = function(id) {
-			window.location = "admin.php?page=autoposter&action=edit-feed&feed_id="+id;
-		}
-
-		global.doValidation = function(){
-	    	var errors = hasValidationErrors();
-			if ( !errors ){
-				$('#btn-create-feed').removeAttr('disabled');
-				$('#btn-preview-feed').removeAttr('disabled');
-
-				if( $( '#btn-preview-feed' ).off ){
-					$( '#btn-preview-feed' ).off('click');
-				}else{
-					$( '#btn-preview-feed' ).unbind('click');
-				}
-				$('.hide').show();					
-			}else{
-				$( '#btn-create-feed' ).attr('disabled', 'disabled');
-				$( '#btn-preview-feed' ).attr('disabled', 'disabled');
-
-				if( $( '#btn-preview-feed' ).off ){
-					$( '#btn-preview-feed' ).off('click');
-				}else{
-					$( '#btn-preview-feed' ).unbind('click');
-				}				
-
-				$('.hide').hide();
-			}
-			
-		}
-
-		global.validateFeedName = function(edit){
-			var feed_date = $('#feed_date').val();
-			var name = $('#name').val();
-			if(name == ""){
-				$('#name').val(feed_date);
-				$("#form-create-feed").submit();
-			}
-			name = $.trim($('#name').val());
-			var regx_name = /\s/;		
-			var regx = /^[a-zA-Z0-9,\s]+$/;
-
-			var data = {
-				action: 'get_name_action',
-				name: name
-			};
-
-			// Update feed
-			if(edit === "update"){ 
-				if(!regx.test(name)){
-					alert("The name entered contains special characters or starts/ends with spaces. Please enter a different name");
-				}else if(name.length < 6){					
-					alert("The name entered is less than 6 characters. Please enter a name between 6 and 14 characters");
-				}else {
-					$('#name').val(name);
-					$("#form-create-feed").submit();
-				}
-	
-			}else{  // Create feed
-				$.post(ajaxurl, data, function(response) {
-					//alert('Got this from the server: ' + response);
-				    if(response != "true"){
-					   	if((feed_date == name) && ((typeof edit === "undefined") || (edit===null))){
-							$('#dialog-name').val(name);
-							$('#dialog').dialog('open');
-				    	}else{
-							if(!regx.test(name)){
-								alert("The name entered contains special characters or starts/ends with spaces. Please enter a different name");
-							}else if(name.length < 6){					
-								alert("The name entered is less than 6 characters. Please enter a name between 6 and 14 characters");
-							}else {
-								$('#name').val(name);
-								$("#form-create-feed").submit();
-							}				
-						}
-					}else{					
-						alert("The name entered is already in use. Please select a different name");
-					}				
-				});	
-			}
-
-		}
-
-	} )( window, jQuery );
-
-	var multiSelectOptions = {
-	  	 noneSelectedText:"Select providers",
-	  	 selectedText:function(selectedCount, totalCount){
-			if (totalCount==selectedCount){
-	  	 		return "All providers selected";
-	  	 	}else{
-	  	 		return selectedCount + " providers selected of " + totalCount;
-	  	 	}
-	  	 }
-	};
-
-	var multiSelectOptionsCategories = {
-	  	 noneSelectedText:"Select categories",
-	  	 selectedText: "# of # selected"
-	};
-
-	var multiSelectOptionsChannels = {
-	  	 noneSelectedText:"Select Video Categories",
-	  	 selectedText:function(selectedCount, totalCount){
-			if (totalCount==selectedCount){
-	  	 		return "All Video Categories";
-	  	 	}else{
-	  	 		return selectedCount + " of " + totalCount + " Video Categories";
-	  	 	}
-	  	 }
-	};
-
-	jQuery(function($){
-		$('#reset-form').bind('click', function(e){
-		    var referer = $("input[name=referer]").val();
-		    
-		    if( referer == "create" ){
-		    	window.location = "admin.php?page=autoposter";
-		    }else{
-		    	var id = $("input[name=feed_id]").val();
-		    	window.location = "admin.php?page=autoposter&action=edit-feed&feed_id="+id;
-		    }
-		    
-		});
-
-	   $("#form-create-feed input").keypress(function(e) {
-		    if(e.which == 13) {
-		        e.preventDefault();
-		        return false;
-		    }
-		});
-
-		if($('#provider-select option:selected').length == 0){
-			$('#provider-select option').attr('selected', 'selected');
-		}
-
-		if($('#channel-select option:selected').length == 0){
-			$('#channel-select option').attr('selected', 'selected');
-		}
-
-		var category_options = $('#cat option');
-		for(var i=0;i<category_options.length; i++){
-			if($.inArray($(category_options[i]).val(),selectedCategories)>-1){
-				$(category_options[i]).attr("selected", "selected");
-			}
-		}
-
-		$("#provider-select").multiselect(multiSelectOptions, {
-	  	 uncheckAll: function(e, ui){
-	  	 	doValidation();
-		 },
-		 checkAll: function(e, ui){
-		 	/*
-		 	if($("#provider-select :selected").length != 0){
-				$('.hide').show();
-			}
-			*/
-			doValidation();
-		 }
-		  }).multiselectfilter();
-
-		  $(".provider-select-update").multiselect(multiSelectOptions, {
-		  	 uncheckAll: function(e, ui){
-		  	 	id = this.id.replace('provider-select-update-','');
-			 },
-			 checkAll: function(e, ui){
-		  	 	id = this.id.replace('provider-select-update-','');
-			 }
-		   }).multiselectfilter();
-
-		  $('.btn-update').bind('click', function(e){
-		    id = $(this).attr('name');
-			var form = $('#form-'+id);
-			var action = $('#action-'+id);
-			if($("#provider-select-update-" + id + " :selected").length == 0){
-				alert("Please select at least one provider");
-				e.preventDefault();
-			}else{
-				action.val("modify");
-				form.submit();
-			}
-		  });
-
-		  $("#cat").multiselect(multiSelectOptionsCategories,
-		  {
-		  	header:false
-		  });
-
-		  $(".postcats").multiselect(multiSelectOptionsCategories, {
-		  	header:false,
-		  	uncheckAll: function(e, ui){
-		  	 	id = this.id.replace('postcats-','');
-			 },
-			 checkAll: function(e, ui){
-		  	 	id = this.id.replace('postcats-','');
-			 }
-		  }).multiselectfilter();
-
-		  //$(".channel-select").selectmenu();
-		  $(".schedule-select").selectmenu();
-		  $(".limit-select").selectmenu();
-		  $(".author-select").selectmenu();
-
-		  $("#learn-more").simpletip({
-		  	 content: 'Please be aware that selecting a click-to-play player can negatively impact your revenue, <br />as not all users will generate an ad impression. If you are looking to optimize revenue <br />through Grabpress, all feeds should be set to autoplay. ',
-		  	 fixed: true,
-		  	 position: 'bottom'
-		  });
-		  $('input, textarea').placeholder();
-
-		  $('.active-check').bind('click', function(e){
-
-		  	var id = this.id.replace('active-check-','');
-		  	var active_check = $(this);
-
-		  	if(active_check.is(':checked')) {
-		        var active = 1;		        
-		        $('#tr-'+id+' td').css("background-color","#FFE4C4");
-		    }else{
-		    	var active = 0;
-		    	$('#tr-'+id+' td').css("background-color","#DCDCDC");		    	
-		    }		    
-
-		    var data = {
-				action: 'my_action',
-				feed_id: id,
-				active: active
-			};
-
-			$.post(ajaxurl, data, function(response) {
-				//alert('Got this from the server: ' + response);
-				var substr = response.split('-');
-				var num_active_feeds = substr[0];
-				var num_feeds =  substr[1];
-				var noun = 'feed';	
-				var autoposter_status = 'ON';
-				var feeds_status = 'active';		
-
-				/*
-				if( (num_active_feeds == 1) || (num_feeds == 1) ){
-					noun = 'feed';	
-				}else */
-				if(num_active_feeds == 0){
-					var autoposter_status = 'OFF';
-					var feeds_status = 'inactive';
-					response = '';					
-					num_active_feeds = num_feeds;
-					if(num_feeds > 1){
-						noun = noun + 's';
-					}					
-				}else if( (num_active_feeds == 1) ){
-					noun = 'feed';	
-				}else{
-					noun = noun + 's';
-				}
-				
-				$('#num-active-feeds').text(num_active_feeds);	
-				$('#noun-active-feeds').text(noun);
-
-				$('#autoposter-status').text(autoposter_status);
-				$('#feeds-status').text(feeds_status);
-			});
-
-
-		  });	  
-
-		   $('#cancel-editing').bind('click', function(e){ 
-				var answer = confirm('Are you sure you want to cancel editing? You will continue to receive videos based on its settings. All of your changes will be lost.');
-				if(answer){				
-					window.location = "admin.php?page=autoposter";
-				} else{				
-					return false;
-				}
-		  });
-
-		  $(".ui-selectmenu").click(function(){
-			    $(".ui-multiselect-menu").css("display", "none");
-			});		  
-
-		  $("#channel-select").multiselect(multiSelectOptionsChannels, {
-		  	 uncheckAll: function(e, ui){
-		  	 	
-			 },
-			 checkAll: function(e, ui){
-		  	 	
-			 }
-		   });
-
-		  $("#form-create-feed").change(doValidation);	
-		  //$("input").keyup(doValidation);
-		  //$("input").click(doValidation);
-		  //$("select").change(doValidation);
-
-		  $('#dialog').dialog({
-            autoOpen: false,
-            width: 400,
-            modal: true,
-            resizable: false,
-            buttons: {
-            	"Cancel": function() {
-                  $(this).dialog("close");
-                },
-                "Create Feed": function() {
-                  var name = $("#dialog-name").val();
-                  $("#name").val(name);
-                  validateFeedName("edit");
-                }
-            }
-          }); 
-
-	       $(".btn-update-feed").mousedown(function(event) {
-			   if( event.which == 2 ) {
-			   	  return false;
-			   	  id = this.id.replace('btn-update-','');
-          	      editFeed(id); 
-			   }
-		   });
-	      $('.btn-update-feed').bind("click",function(e){
-          	id = this.id.replace('btn-update-','');
-          	editFeed(id);
-	        return false;
-	      });
-
-          $('.btn-update-feed').bind("contextmenu",function(e){
-          	id = this.id.replace('btn-update-','');
-          	editFeed(id);
-	        return false;
-	      });
-
-	});
-
-	jQuery(window).load(function () {
-	    doValidation();
-	});
-
-	</script>
+		<fieldset id="create-form" class="<?php echo $is_edit ? 'edit-mode':''?>">
+		<legend><?php echo $is_edit ? 'Edit':'Create'?> Feed</legend>	
 	<?php
 		$rpc_url = get_bloginfo( 'url' ).'/xmlrpc.php';
-		$connector_id = GrabPress::get_connector_id();
+		$connector_id = GrabPressAPI::get_connector_id();
 	?>
 	<form method="post" action="" id="form-create-feed">
 		<?php 
-			if(isset($form["feed_id"])) {
+			if(isset($form["feed_id"]) && $form["feed_id"] > 0) {
 				$feed_id = $form["feed_id"];
 		?>
 			<input type="hidden"  name="feed_id" value="<?php echo $feed_id; ?>" />
-		<?php		
+		<?php
 			}
 		?>
 		<?php 
@@ -414,7 +37,7 @@
 			}else{
 				$referer = "create";
 			}	
-			if(isset($form["action"])){		
+			if($is_edit){		
 				$value = ($form["action"] == "modify") ? 'modify' : 'update';
 			}else{
 				$value = "update";
@@ -426,18 +49,17 @@
         	<table class="form-table grabpress-table">
 	            <?php if (GrabPress::$environment == 'grabqa'){ ?>
 	                <tr valign="bottom">
-						<th scope="row">Plug-in Version & Build Number</th>
+						<th scope="row">Plug-in Version &amp; Build Number</th>
 			            <td>
 							<?php echo GrabPress::$version ?>
 						</td>
-					</tr>
+					</tr> <?php } ?>
 	                <tr valign="bottom">
 						<th scope="row">API Key</th>
 			            <td>
 							<?php echo get_option( 'grabpress_key' ); ?>
 						</td>
 					</tr>
-				<?php } ?>
 				<tr>
 					<td>
 						<h3>Search Criteria</h3>
@@ -457,12 +79,16 @@
 					<th scope="row">Grab Video Categories<span class="asterisk">*</span></th>
 					<td>
 						<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />					
-						<select  style="<?php GrabPress::outline_invalid() ?>" name="channel[]" id="channel-select" class="channel-select multiselect" multiple="multiple" style="width:500px" >
+						<select  style="<?php GrabPress::outline_invalid() ?>" name="channels[]" id="channel-select" class="channel-select multiselect" multiple="multiple" style="width:500px" >
 							<?php								
-								if(is_array($form["channel"])){
-									$channels = $form["channel"];
+								if(!array_key_exists("channels", $form)){
+									$form["channels"] = array();
+								}
+								
+								if(is_array($form["channels"])){
+									$channels = $form["channels"];
 								}else{
-									$channels = explode( ",", rawurldecode($form["channel"])); // Video categories chosen by the user
+									$channels = explode( ",", rawurldecode($form["channels"])); // Video categories chosen by the user
 								}
 								
 								foreach ( $list_channels as $record ) {
@@ -509,13 +135,13 @@
 						<th scope="row">Content Providers</th>
 						<td>
 							<input type="hidden" name="providers_total" value="<?php echo $providers_total; ?>" class="providers_total" id="providers_total" />
-							<select name="provider[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php GrabPress::outline_invalid() ?>" onchange="doValidation()" >
+							<select name="providers[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php GrabPress::outline_invalid() ?>" onchange="GrabPressAutoposter.doValidation()" >
 							<?php
 								foreach ( $list_providers as $record_provider ) {
 									$provider = $record_provider->provider;
 									$provider_name = $provider->name;
 									$provider_id = $provider->id;
-									$provider_selected = ( in_array( $provider_id, $form["provider"] ) )?'selected="selected"':"";
+									$provider_selected = ( in_array( $provider_id, $form["providers"] ) )?'selected="selected"':"";
 									echo '<option '.$provider_selected.' value = "'.$provider_id.'">'.$provider_name.'</option>\n';
 								}
 							?>
@@ -525,7 +151,7 @@
 				</tr>
 				<tr valign="bottom">
 					<td colspan="2" class="button-tip">						
-						<input type="button" onclick="previewVideos()" class="button-secondary" disabled="disabled" value="<?php isset($_GET['action'])=='edit-feed' ?_e( 'Preview Changes' ):  _e( 'Preview Feed' )  ?>" id="btn-preview-feed" />
+						<input type="button" onclick="GrabPressAutoposter.previewVideos()" class="button-secondary" disabled="disabled" value="<?php $is_edit ?_e( 'Preview Changes' ):  _e( 'Preview Feed' )  ?>" id="btn-preview-feed" />
 						<span class="hide preview-btn-text">Click here to sample the kinds of videos that will be auto posted by this feed in the future.</span>
 					</td>
 				</tr>
@@ -547,12 +173,12 @@
 											$times = array( '06 hrs', '12 hrs', '01 day', '02 days', '03 days' );
 										}	
 
-										if ( GrabPress::$environment == 'grabqa' ) {												
-											$values = array( 15,  30,  45, 60, 120, 360, 720, 1440, 2880, 4320 );
-										}
-										else {
-											$values = array( 360, 720, 1440, 2880, 4320 );
-										}
+										if ( GrabPress::$environment == 'grabqa' ) {                        
+								          $values = array( 15*60,  30*60,  45*60, 60*60, 120*60, 360*60, 720*60, 1440*60, 2880*60, 4320*60 );
+								        }
+								        else {
+								          $values = array( 360*60, 720*60, 1440*60, 2880*60, 4320*60 );
+								        }
 
 										if(!isset($form["schedule"])){
 											for ( $o = 0; $o < count( $times ); $o++ ) {
@@ -606,8 +232,10 @@
 								foreach ( $blogusers as $user ) {
 									$author_name = $user->display_name;
 									$author_id = $user->ID;
-									$selected = ((isset($form["author"])) && ( $form["author"]==$author_id ) )?'selected="selected"':"";
-									echo '<option value = "'.$author_id.'" '.$selected.'>'.$author_name.'</option>\n';
+									if($author_name != "GrabPress"){
+										$selected = ((isset($form["author"])) && ( $form["author"]==$author_id ) )?'selected="selected"':"";
+										echo '<option value = "'.$author_id.'" '.$selected.'>'.$author_name.'</option>\n';
+									}
 								}
 							?>
 							</select>
@@ -649,17 +277,17 @@
 				</tr>
 				<tr valign="bottom">					
 					<td class="button-tip" colspan="2">						
-						<?php $click = ( isset($_GET['action'])=='edit-feed' ) ? 'onclick="validateFeedName(\'update\')"' : 'onclick="validateFeedName()"' ?>
-						<input type="button" class="button-primary" disabled="disabled" value="<?php ( isset($_GET['action'])=='edit-feed' ) ? _e( 'Save Changes' ) : _e( 'Create Feed' ) ?>" id="btn-create-feed" <?php echo $click; ?>  />
+						<?php $click = ( $is_edit ) ? 'onclick="GrabPressAutoposter.validateFeedName(\'update\')"' : 'onclick="GrabPressAutoposter.validateFeedName()"' ?>
+						<input type="button" class="button-primary" disabled="disabled" value="<?php ( $is_edit ) ? _e( 'Save Changes' ) : _e( 'Create Feed' ) ?>" id="btn-create-feed" <?php echo $click; ?>  />
 						<a id="reset-form" href="#">reset form</a>
-						<?php if(isset($_GET['action'])=='edit-feed'){ ?><a href="#" id="cancel-editing" >cancel editing</a><?php } ?>				
+						<?php if($is_edit){ ?><a href="#" id="cancel-editing" >cancel editing</a><?php } ?>	
 						<span class="description" style="<?php GrabPress::outline_invalid() ?>color:red"> <?php echo GrabPress::$feed_message; ?> </span>
 					</td>
 				</tr>
 				</table>
 			</form>
 </fieldset>
-<?php if(isset($_GET['action'])=='edit-feed') { ?>
+<?php if($is_edit) { ?>
 <span class="edit-form-text display-element" >Please use the form above to edit the settings of the feed marked "editing" below</span>
 <?php } ?>
 
@@ -671,11 +299,11 @@
 </div>
 
 <?php
-	$feeds = GrabPress::get_feeds();
+	$feeds = GrabPressAPI::get_feeds();
 	$num_feeds = count( $feeds );
 	if($num_feeds > 0 ){
 		echo GrabPress::fetch('includes/gp-manage-feeds.php',
-			array( "form" => $_REQUEST,
+			array( "form" => $form,
 				"list_providers" => $list_providers,
 				"providers_total" => $providers_total,
 				"list_channels" => $list_channels,
