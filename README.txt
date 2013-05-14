@@ -62,6 +62,10 @@ www.grab-media.com
 
 **Getting Started...**
 
+= What are the necessary system requirements for GrabPress? =
+
+ GrabPress has been tested through WordPress versions 3.4 and greater.  There are some WordPress specific methods that require at least version 3.4.  GrabPress also require a minimum PHP version of 5.3.  If you experience odd behavior, such as not able to link to an existing account, ensure you have at least PHP 5.3 installed on the server running your WordPress instance.
+
 = How do I set up an account with Grab Media? =
 
  After installing the plug-in, click on GrabPress and then click on the Account link.  This will bring up the option to create a new account with Grab Media, or to link an existing account with us. 
