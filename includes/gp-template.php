@@ -5,6 +5,7 @@
 	<p>Video that fits your site design</p>
 <form action="" method="POST" class="template-form">
 	<input type="hidden" name="action" value="<?php echo $form["action"];?>" />
+        <input type="hidden" id="player_width_orig" name="width_orig" value="<?php echo $form["width"];?>" />
 	<fieldset>
 		<legend>Player</legend>
 
@@ -13,14 +14,14 @@
 			<tr valign="bottom">
 	   			<th scope="row">Ratio <span class="asterisk">*</span></th>
 				<td>
-					<input type="radio" name="ratio" value="widescreen" <?php echo $form["widescreen_selected"]?$checked:""; ?> /> Widescreen 16:9
+					<input type="radio" name="ratio" value="widescreen" <?php if(!isset($form["widescreen_selected"])) echo $checked; echo $form["widescreen_selected"]?$checked:""; ?> /> Widescreen 16:9
 					<input type="radio" name="ratio" value="standard" <?php echo $form["standard_selected"]?$checked:""; ?> /> Standard 4:3 
 				</td>
 			</tr>
 			<tr valign="bottom">
 	   			<th scope="row">Width</th>
 				<td>
-					<input type="text" name="width" value="<?php echo $form["width"];?>" />
+					<input type="text" id="player_width" name="width" value="<?php echo $form["width"];?>" />
 				</td>
 			</tr>
 			<tr valign="bottom">
@@ -45,26 +46,16 @@
 	</fieldset>
 </form>
 
-<div class="template-preview">
+<div class="template-preview" style="width:<?php echo $form['width']?>px;height:<?php echo $form['height']?>px;">
 	<div class="widescreen" <?php if(!$form["widescreen_selected"]){?>style="display:none;" <?php }?> ></div>
 	<div class="standard" <?php if(!$form["standard_selected"]){?>style="display:none;" <?php }?> ></div>
 </div>
 </div>
-<script type="text/javascript">
- 	jQuery(function($){
- 		var updateHeightValue = function(){
-		 	if($("form input[name=ratio]:checked").val() == "widescreen"){
-		 		var height = ($("form input[name=width]").val()/16)*9;
-		 	}else{
-				var height = ($("form input[name=width]").val()/4)*3;
-		 	}
-	 		$(".height").text(parseInt(height,10));
- 		};
- 		$("form input[name=width]").change(updateHeightValue);
- 		$("form input[name=ratio]").change(updateHeightValue);
- 		$("form input[name=ratio]").change(function(){
-			$(".template-preview .widescreen").toggle();
- 			$(".template-preview .standard").toggle();
- 		})
- 	});
-</script>
+
+<div id="dialog_300" title="Dialog Title">
+<p></p>
+</div>
+
+<div id="dialog_640" title="Dialog Title">
+<p></p>
+</div>
