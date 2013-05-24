@@ -5,7 +5,7 @@ require_once dirname(__FILE__)."/GrabPressAPI.php";
 Plugin Name: GrabPress
 Plugin URI: http://www.grab-media.com/publisher/grabpress
 Description: Configure Grab's AutoPoster software to deliver fresh video direct to your Blog. Link a Grab Media Publisher account to get paid!
-Version: 2.3.1
+Version: 2.3.1.1
 Author: Grab Media
 Author URI: http://www.grab-media.com
 License: GPL2
@@ -27,11 +27,11 @@ License: GPL2
 */
 if ( ! class_exists( 'GrabPress' ) ) {
 	class GrabPress {
-		static $version = '2.3.1';
+		static $version = '2.3.1.1';
 		static $api_key;
 		static $invalid = false;
 		static $environment =  'grabnetworks';
-		static $debug = true;
+		static $debug = false;
 		static $message = false;
 		static $error = false;
 		static $grabpress_user = "grabpress";
