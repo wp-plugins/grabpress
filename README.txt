@@ -3,7 +3,7 @@ Contributors: grabmedia
 Tags: video, grab, autoposter, grab press, grab media, grab-media, grab networks, video catalog, media, video feed, video player, video content, professional video, ad revenue
 Requires at least: 3.4   
 Tested up to: 3.5  
-Stable tag: 2.3.1.1
+Stable tag: 2.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -174,6 +174,13 @@ We hope to allow users to edit the layout / posting template in future updates o
 5. Video results are automatically posted to your Blog.
 
 == Changelog ==  
+
+= 2.3.2 =
+
+ * AUTO-660: As a WordPress Publisher, I want the player in the dashboard to be visible between a minimum of 320px and a maximum of 640px width.
+ * AUTO-802: As a Grab Media Developer, I want to know more about our user environments, so we can better develop, test and debug against user environments.
+ * Added support for PHP 5.2.4 call DateTime::modify, replacing DateTime::sub (The DateTime::Sub() error should no longer appear).
+ * Addes support for PHP 5.2.4 call to check if PHP is configured with MagicQuotes for json_encode() call.
 
 = 2.3.1.1 =
  * Turned debugging off by default.  (Thanks goes to @optimalpatrick)
