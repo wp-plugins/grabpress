@@ -40,7 +40,7 @@
 	<div id="buttons" >
 		<span id="required" class = "account-help" >Note: All fields marked with an asterisk* are required.</span>
 		<a id = "clear-form" href ="#">clear form</a>	
-		<input type="button" class="button-primary" disabled="disabled" id="submit-button" value="<?php _e( $text = ($_REQUEST[ 'action' ] == 'switch') ? 'Change' : 'Link'.' Account') ?>"/>
+		<input type="button" class="button-primary" disabled="disabled" id="submit-button" value="<?php _e( $text = ($request[ 'action' ] == 'switch') ? 'Change' : 'Link'.' Account') ?>"/>
 		<input type="button" class="button-secondary" id="cancel-button" value="<?php _e('Cancel') ?>"/>
 	</div>
 </fieldset>
@@ -96,6 +96,10 @@
 				//console.log( 'url:' + url_valid );
 				//var valid = email_valid && pass_valid && pass_match &&first_valid &&last_valid && address_valid && city_valid && state_valid &&zip_valid && agree_valid && phone_valid && url_valid;
 				var valid = email_valid && pass_valid && pass_match &&first_valid &&last_valid && address_valid && city_valid && state_valid &&zip_valid && agree_valid && url_valid;
+                                if (jQuery("#message p").text() == "There was an error connecting to the API! Please try again later!") {
+                                    valid = false;
+                                    jQuery(":input").attr('disabled', 'disabled');
+                                }
 				return valid
 			}
 			//$('#submit-button').bind('click', function(e){
@@ -125,13 +129,35 @@
 						$( '#submit_button' ).bind('click');
 					}
 				}
-			}
+			};
+                        function setConfirmUnload(on) {
+                            window.onbeforeunload = (on) ? unloadMessage : null;
+                        }
+
+                        function unloadMessage() {
+                            return 'You have entered new data on this page.' +
+                            ' If you navigate away from this page without' +
+                            ' first saving your data, the changes will be' +
+                            ' lost.';
+                          }
 		    $("input").keyup(doValidation);
 		    $("input").click(doValidation);
 		    $("select").change(doValidation);
 		    $("#clear-form").click(function() {
 				$('#register')[0].reset();
 		    	doValidation();
-		    })
+		    });
+                    $('input:text, input:password, input:checkbox, select', 'form').bind("change", function () {
+                        setConfirmUnload(true);
+                    });                    
+                    jQuery('#register').submit(function(){
+                        window.onbeforeunload = null;
+                    });
+                    $(document).ready(function(){
+                        //if we have an API connection error disable all inputs
+                        if (jQuery("#message p").text() == "There was an error connecting to the API! Please try again later!") {
+                            jQuery(":input").attr('disabled', 'disabled');
+                        }
+                    });		
 		   })(jQuery)
 	</script>
