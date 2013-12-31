@@ -1,45 +1,61 @@
 <div class="wrap">
-			<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg"/>
-			<h2>GrabPress: Earn money with a Grab Publisher Account</h2>
-			<?php
-				try {
-                                    $user = GrabPressAPI::get_user();
-                                } catch(Exception $e) {
-                                    GrabPress::log('API call exception: '.$e->getMessage());
-                                }
-				$linked = isset( $user->email);
-				if( $linked ){?>
-			<p class="account-help">This installation is linked to <?php echo $user->email; ?></p>					
-				<?php }else{?>					
-			<p class="account-help">This installation is not linked to a Publisher account. <a href="#">what is that?</a><br/>
-			Linking GrabPress to your account allows us to keep track of the video ads displayed with your Grab content and make sure you get paid.</p>
-				<?php }?>
-			<p class="account-help">From here you can:</p>
-			<?php
-				echo $linked ? GrabPress::fetch('includes/account/chooser/linked.php', array("request" =>$request)) : GrabPress::fetch('includes/account/chooser/unlinked.php', array("request" =>$request));
-			?>
-			<script>
-				(function( $ ){                                    
-					$( '#account-chooser input' ).click( function(){
-						$( '#account-chooser').submit();
-					});                                        
-				})( jQuery )
-			</script>
-			<?php switch( $request[ 'action' ] ){
-					case 'default':
-					case NULL:
-						if($linked){
-							break;
-						}
-					case 'switch':
-						echo GrabPress::fetch('includes/account/forms/link.php', array("request" =>$request));
-						break;
-					case 'create':
-						echo GrabPress::fetch('includes/account/forms/create.php', array("request" =>$request));
-						break;
-					case 'unlink':
-						echo GrabPress::fetch('includes/account/forms/unlink.php', array("request" =>$request));
-						break;
+	<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg" alt="GrabMedia logo" />
+	<h2>GrabPress: Earn money with a Grab Publisher Account</h2>
+	<?php
+		// Try fetching user from API
+		try {
+			$user = Grabpress_API::get_user();
+		} catch( Exception $e ) { // If fetch unsuccessful
+			// Log exception error message
+			Grabpress::log( 'API call exception: ' . $e->getMessage() );
+		}
+
+		// Check if email linked to user account
+		$linked = isset( $user->email );
+
+		// If email linked
+		if( $linked ) {
+	?>
+		<p class="account-help">This installation is linked to <?php echo $user->email; ?></p>
+	<?php } else { ?>
+		<p class="account-help">This installation is not linked to a Publisher account. <a href="#">what is that?</a><br />
+		Linking GrabPress to your account allows us to keep track of the video ads displayed with your Grab content and make sure you get paid.</p>
+	<?php } ?>
+	<p class="account-help">From here you can:</p>
+	<?php
+		echo $linked ? Grabpress::render( 'includes/account/chooser/linked.php', array( 'request' => $request ) ) : Grabpress::render( 'includes/account/chooser/unlinked.php', array( 'request' => $request ) );
+	?>
+	<?php
+		switch( $request['action'] ) {
+			case 'default':
+			case NULL:
+				if( $linked ) {
+					break;
 				}
-			?>
+			case 'switch':
+				echo Grabpress::render( 'includes/account/forms/link.php', array( 'request' => $request ) );
+				break;
+			case 'create':
+				echo Grabpress::render('includes/account/forms/create.php', array( 'request' => $request ) );
+				break;
+			case 'unlink':
+				echo Grabpress::render('includes/account/forms/unlink.php', array( 'request' => $request ) );
+				break;
+		}
+	?>
+	<script>
+		// Create jQuery $ scope
+		(function($){
+
+			// DOM ready
+			$(function() {
+				// On account chooser input change
+				$( '#account-chooser input' ).on( 'change', function() {
+					// Submit account chooser
+					$( '#account-chooser' ).submit();
+				});
+			});
+
+		})(jQuery); // End jQuery $ scope
+	</script>
 </div>

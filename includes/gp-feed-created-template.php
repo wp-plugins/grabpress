@@ -1,62 +1,123 @@
 <script type="text/javascript">
-jQuery('#message').hide();
-jQuery(document).ready(function($) {
-    $('#wpbody-content').append($('#message'));
-});
-var gp_redirect_url = "admin.php?page=gp-autoposter";
-var gp_redirect_seconds = 4;
-var gp_redirect_time;
-function gp_redirect() {
-  document.title='Redirecting in ' + gp_redirect_seconds + ' seconds';
-  gp_redirect_seconds=gp_redirect_seconds-1;
-  gp_redirect_time=setTimeout("gp_redirect()",1000);
-  if (gp_redirect_seconds==-1) {
-    clearTimeout(gp_redirect_time);
-    document.title='Redirecting ...';
-    self.location= gp_redirect_url;
-  }
-}
-jQuery(function(){
-  gp_redirect();
-})
+	// Create jQuery $ scope
+	(function($){
+
+		// Define vars
+		var gpRedirectTime,
+				message = $( '#message' ),
+				wpBodyContent = $( '#wpbody-content' ),
+				gpRedirectURL = 'admin.php?page=gp-autoposter',
+				gpRedirectSeconds = 4
+		;
+
+		// Hide message
+		message.hide();
+
+		function gpRedirect() {
+			// Update page title to show redirect message
+			document.title = 'Redirecting in ' + gpRedirectSeconds + ' seconds';
+
+			// Decrement redirect seconds
+			gpRedirectSeconds = gpRedirectSeconds - 1;
+
+			// Set timeout loop for every 1 second to refire gpRedirect() and update title
+			// with # of seconds remaining to redirect
+			gpRedirectTime = setTimeout( gpRedirect, 1000 );
+
+			// Once seconds get below 0
+			if ( -1 == gpRedirectSeconds ) {
+				// Clear timeout loop
+				clearTimeout( gpRedirectTime );
+
+				// Update title to show active redirecting
+				document.title='Redirecting ...';
+
+				// Redirect
+				window.location = gpRedirectURL;
+			}
+		}
+
+		// DOM ready
+		$(function() {
+			// Append message to WP body content
+			wpBodyContent.append( message );
+
+			// Redirect with countdown
+			gpRedirect();
+		});
+
+	}(jQuery)); // End jQuery $ scope
 </script>
 
 <div id="message-feed-created" class="updated fade">
-  <p>
-    Feed created successfully.  Redirecting in 5 seconds ...  If you are not redirected automatically, please press <a href="admin.php?page=gp-autoposter">here</a>
-  </p>
+	<p>Feed created successfully.  Redirecting in 5 seconds ...  If you are not redirected automatically, please press <a href="admin.php?page=gp-autoposter">here</a></p>
 </div>
 
-<?php 
-    if(isset($request[ 'page']) && $request[ 'page'] == 'autoposter' && isset($request[ 'action']) &&  (($request[ 'action'] == 'update') || ($request[ 'action'] == 'modify')) )
-      {
-        if ( GrabPress::$environment == 'grabqa' ) {
-          $times = array( '15 mins', '30  mins', '45 mins', '01 hr', '02 hrs', '06 hrs', '12 hrs', '01 day', '02 days', '03 days' );
-        }
-        else {
-          $times = array( '06 hrs', '12 hrs', '01 day', '02 days', '03 days' );
-        } 
+<?php
+	// If page and action set in request and page is autoposter and action is either update or modify
+	if ( isset( $request['page'], $request['action'] ) && 'autoposter' == $request['page'] && ( 'update' == $request['action'] || 'modify' == $request['action'] ) ) {
+		// If current ENV is development
+		if ( DEVELOPMENT_ENV == Grabpress::$environment ) {
+			// Create times and values arrays for development
+			$times = array(
+				'15 mins',
+				'30 mins',
+				'45 mins',
+				'01 hr',
+				'02 hrs',
+				'06 hrs',
+				'12 hrs',
+				'01 day',
+				'02 days',
+				'03 days',
+			);
+			$values = array(
+				15*60,
+				30*60,
+				45*60,
+				60*60,
+				120*60,
+				360*60,
+				720*60,
+				1440*60,
+				2880*60,
+				4320*60,
+			);
+		} else { // Current ENV is production
+			// Create times and values arrays for production
+			$times = array(
+				'06 hrs',
+				'12 hrs',
+				'01 day',
+				'02 days',
+				'03 days',
+			);
+			$values = array(
+				360*60,
+				720*60,
+				1440*60,
+				2880*60,
+				4320*60,
+			);
+		}
 
-        if ( GrabPress::$environment == 'grabqa' ) {                        
-          $values = array( 15*60,  30*60,  45*60, 60*60, 120*60, 360*60, 720*60, 1440*60, 2880*60, 4320*60 );
-        }
-        else {
-          $values = array( 360*60, 720*60, 1440*60, 2880*60, 4320*60 );
-        }
+		// If schedule was set in request
+		if ( isset( $request['schedule'] ) ) {
+			// Loop through times
+			for ( $o = 0; $o < count( $times ); $o++ ) {
+				// Get current iterations time and value
+				$time = $times[ $o ];
+				$value = $values[ $o ];
 
-        if(isset($request['schedule'])){
-          for ( $o = 0; $o < count( $times ); $o++ ) {
-            $time = $times[$o];
-            $value = $values[$o];
-            if($value == $request["schedule"]){
-              GrabPress::$message = 'A new draft or post will be created every '.$time.' if videos that meet your search criteria have been added to our catalog.';           
-            }
-          }
-        }
-    }
-        //echo GrabPress::$message = 'A new draft or post will be created every '.$time.' if videos that meet your search criteria have been added to our catalog.'; 
+				// If requested schedule is current value
+				if( $value == $request['schedule'] ) {
+					// Output schedule confirmation message with time frequency
+					Grabpress::$message = 'A new draft or post will be created every ' . $time . ' if videos that meet your search criteria have been added to our catalog.';
+				}
+			}
+		}
+	}
 ?>
 <div class="grabgear">
-    <?php echo '<img src="'.plugin_dir_url( __FILE__ ).'images/grabgear.gif" alt="Grab">'; ?>
+	<?php echo '<img src="' . plugin_dir_url( __FILE__ ) . 'images/grabgear.gif" alt="Grab">'; ?>
 </div>
-

@@ -1,349 +1,732 @@
-/* 
- *  Grabpress Dashboard javascript functionality
+/**
+ * Plugin Name: GrabPress
+ * Plugin URI: http://www.grab-media.com/publisher/grabpress
+ * Description: Configure Grab's AutoPoster software to deliver fresh video
+ * direct to your Blog. Link a Grab Media Publisher account to get paid!
+ * Version: 2.3.4.1-06252013
+ * Author: Grab Media
+ * Author URI: http://www.grab-media.com
+ * License: GPL2
  */
 
-var GrabPressDashboard = GrabPressDashboard || {
-    active_video : null,
-    /* Displays the first video from watchlist */
-    onload_openvideo : function(embed_id) {
-        if(jQuery(".accordion-warning").length == 1){
-            return false;
-        }
-        var embed = "";
-        var anchor = jQuery(jQuery(".accordion-toggle[href='#collapse1']")[0]);
-        embed = '<div id="gcontainer'+embed_id+'" style="height:100%;"><div id="grabDiv'+embed_id+'"></div></div>';
-        jQuery("#collapse1").find(".accordion-inner").append(embed);
-        active_video = new com.grabnetworks.Player({
-            "id": embed_id,
-            "width": "100%",
-            "height": "100%",
-            "content": anchor.data("guid"),
-            "autoPlay": false
-        });
-       
-        jQuery("#collapse1").toggleClass("collapse");
-    },
-    /* Watchlist button binding to display/hide videos */
-    watchlist_binding : function(embed_id){
-        jQuery('.watchlist-check').bind('click', function(e){
-            var id = this.id.replace('watchlist-check-','');
-            var watchlist_check = jQuery(this);
-            if(watchlist_check.val() == 1) {
-                var watchlist = 1;
-            }else{
-                var watchlist = 0;	    
-            }  
-            var data = {
-                action: 'gp_toggle_watchlist',
-                feed_id: id,
-                watchlist: watchlist		        
-            };	    
+/**
+ * Copyright 2012 Grab Networks Holdings, Inc.
+ * (email: licensing@grab-media.com)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License, version 2, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-            jQuery.post(ajaxurl, data, function(response) {	        
-                  var parsedJson = jQuery.parseJSON(response);
-                  var accordion = '';
-                  if (parsedJson.results != ''){				    	
-                      for(var i in parsedJson.results) {
-                          if(!isNaN(i)) {
-                              var style = "";
-                              var embed = "";
-                              var collapse = "collapse";
-                              if(i != 0){
-                                  style = 'style="display:none;"';
-                              }else{
-                                  embed = '<div id="gcontainer'+embed_id+'" style="height:100%;"><div id="grabDiv'+embed_id+'"></div></div>';
-                                  collapse = "";
-                              }
+// TODO: Cut down on jQuery factories used by implementing traversing
 
-                              accordion += '<div class="accordion-group">'
-                                          +'<div class="accordion-heading">'
-                                          +'	<div class="accordion-left"></div>'
-                                          +'	<div class="accordion-center">'
-                                          +'		<a class="accordion-toggle feed_title" data-guid="v'+parsedJson.results[i].video.guid+'" data-toggle="collapse" data-parent="#accordion2" href="#collapse' + (i+1) + '">'
-                                          + 		parsedJson.results[i].video.title
-                                          +'		</a>'
-                                          +'	</div>'
-                                          +'	<div class="accordion-right"></div>'
-                                          +'</div>'
-                                          +'<div id="collapse' + (i+1) + '" class="accordion-body '+collapse+' in" '+style+'>'
-                                          +'	<div class="accordion-inner">'
-                                          + embed
-                                          +'	</div>'
-                                          +'</div>'
-                                          +'</div>';
-                        }
-                  }
-                  jQuery('#accordion2').html(accordion);
-                  active_video = new com.grabnetworks.Player({
-                      "id": embed_id,
-                      "width": "100%",
-                      "height": "100%",
-                      "content": parsedJson.results[0].video.guid,
-                      "autoPlay": false
-                  });
-                  jQuery(window).resize();                  
-                  jQuery("#gcontainer"+embed_id+" object").css("visibility","visible");
-              } else {
-                  accordion += '<div class="accordion-group">'
-                              +'<div class="accordion-heading">'
-                              +'	<div class="accordion-left"></div>'
-                              +'	<div class="accordion-center">'										
-                              +'			&nbsp;'
-                              +'	</div>'
-                              +'	<div class="accordion-right"></div>'
-                              +'</div>'
-                              +'<div id="collapse1" class="accordion-body" style="height:95px;">'
-                              +'	<div class="accordion-inner">'
-                              +'		<span class="accordion-warning">Add a feed to your watch list in the Feed Activity panel</span>'
-                              +'	</div>'
-                              +'</div>'
-                              +'</div>';
-                  jQuery('#accordion2').html(accordion);
-              }
-              setTimeout(function(){
-                  jQuery("#t #b .right-pane").css('margin-left', jQuery("#t #b .watchlist").width());
-                  jQuery("#t #b .right-pane").css('margin-top', -jQuery("#t #b .watchlist").height());
-              },300);
-              
-              
-              if(watchlist_check.val() == 1) {
-                watchlist_check.val('0');
-                watchlist_check.addClass('watch-on').removeClass('watch-off');
-              }else{
-                watchlist_check.val('1');
-                watchlist_check.addClass('watch-off').removeClass('watch-on');	    
-              } 
-          });
-      }); 	
-    },
-    /* Watchlist accordion-like behavior */
-    accordion_binding : function(env, embed_id){
-        var accordion_lock = false;
-      //  jQuery("#form-dashboard").parent().css("margin", "-10px 0 0 -18px");
+var GrabPressDashboard;
 
-        jQuery(".accordion-toggle").live("click", function(e){
-            if(accordion_lock){
-                e.preventDefault();
-                return false;
-            }
+// Avoid jQuery conflicts with other plugins
+(function($) {
 
-            var anchor = jQuery(this);
-            var panel = jQuery(anchor.attr("href"));
-            var openPanels = jQuery(".accordion-group .accordion-body").not(".collapse");
-            // debugger;
-            if(panel.hasClass("collapse")){
-                accordion_lock = true;
-                var monitor = 0;
-                var slideDownCurrent = function(panel, onfinish){
-                    var embed = jQuery("#gcontainer"+embed_id).detach();
-                    panel.slideDown(400,'linear', function(){
-                        panel.find('.accordion-inner').append( embed );
-                        panel.toggleClass("collapse");
-                        monitor++;
-                        onfinish(monitor);
-                    });
-                };
-                if(openPanels.length > 0){
-                    slideDownCurrent(panel, function(){
-                        setTimeout(function(){
-                            if(monitor == 2){
-                                  embed = jQuery("#gcontainer"+embed_id).append('<div id="grabDiv'+embed_id+'"></div>');
-                                  active_video = new com.grabnetworks.Player({
-                                        "target": embed,
-                                        "id": embed_id,
-                                        "width": "100%",
-                                        "height": "100%",
-                                        "content": anchor.data("guid"),
-                                        "autoPlay": true
-                                    });
-                                accordion_lock = false;
-                        }}, 100);
-                    });
-                    openPanels.slideUp(400,'linear', function(){
-                        if(active_video){ active_video.destroy();}
-                        jQuery(this).toggleClass("collapse");
-                        monitor++;
-                    });
-                }else{
-                    slideDownCurrent(panel, function(){accordion_lock=false;});
-                }
-            }
-            e.preventDefault();
-            return false;
-        });
-    },
-    /* Resize the watchlist accordion height depending on its width by keeping the same ratio */
-    resize_accordion : function(){
-        var width = jQuery(jQuery(".accordion-center")[0]).css("width");
-        width = width.replace("px","");
-        jQuery(".accordion-inner").css("height", width* 0.5625 )
-    },
-    /* Wordpress menu collapse event*/
-    collapse_menu : function() {
-        //some special margins settings for webkit browsers
-        if (jQuery.browser.safari || jQuery.browser.chrome) {
-            jQuery("#collapse-menu").click(function(){
-                setTimeout(function() {
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', jQuery("#t #b .watchlist").width());
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', -jQuery("#t #b .watchlist").height());
-                }, 150);
-            });            
-        };        
-        //show or hide the watchlist if it's the case when collapsing or expanding the wordpress menu
-        jQuery("#collapse-menu").click(function(){
-                var smallWidth = 1265;
-                setTimeout(function() {
-                    if ( jQuery("#adminmenuwrap").width() < 34 ) {                
-                        smallWidth = 1147;
-                    }
-                    var topRight = '-122px';
-                    if (jQuery.browser.msie && jQuery.browser.version == 8.0) {                    
-                        topRight = '16px';
-                    }  
-                    if ( jQuery(window).width() < smallWidth ) {                
-                        jQuery("#t #b .watchlist .panel:first").hide();
-                        setTimeout(function(){
-                            jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', '8px');
-                            jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', topRight);
-                        }, 150);
-                    } else {                        
-                        jQuery("#t #b .watchlist .panel:first").show();
-                        setTimeout(function(){                            
-                            GrabPressDashboard.resize_accordion();
-                            jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', jQuery("#t #b .watchlist").width() + 8);
-                            jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', -jQuery("#t #b .watchlist").height());
-                        }, 150);
-                    }
-                }, 300);
-        });
-    },
-    /*Browser resizing events*/
-    resize_browser_init : function() {                   
-       //events on browser window resizing
-        jQuery(window).resize(function(){
-            var smallWidth = 1265;
-            //timeout for IE and Firefox to respond to jQuery resize
-            setTimeout(function() {
-                    GrabPressDashboard.resize_accordion();         
-            }, 150);
-            //checking if the wordpress menu is collapsed or not
-            if ( jQuery("#adminmenuwrap").width() < 34 ) {                
-                smallWidth = 1147;
-            } 
-            var left = "#t #b .watchlist .panel:first";
-            var topRight = '-122px';
-            if (jQuery.browser.msie && jQuery.browser.version == 8.0) {
-                left = "#t #b .watchlist";
-                topRight = '16px';
-                setTimeout(function(){
-                   jQuery('.nano').nanoScroller({
-                        preventPageScrolling: true,
-                        "alwaysVisible" : true
-                   },150); 
-                });                
-            }            
-            //hide watchlist if browser is resized under certain width
-            if ( jQuery(window).width() < smallWidth ) {        
-                jQuery(left).hide();
-                if(typeof active_video !== 'undefined') { active_video.pauseVideo(); }
-                setTimeout(function(){
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', '8px');
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', topRight);
-                }, 150);
-            } else //consistent browser bevahior when resizing the browser width under 1283px
-                if ( ((jQuery.browser.msie && jQuery.browser.version > 8.0) || jQuery.browser.chrome 
-                       || jQuery.browser.safari || jQuery.browser.opera) && jQuery(window).width() < 1283 
-                       && jQuery("#t #b .watchlist-wrap .right-pane").position().top != 0) {
-                jQuery(left).show();
-                if(typeof active_video !== 'undefined') { active_video.playVideo(); }
-                setTimeout(function(){
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', jQuery("#t #b .watchlist").width() + 8 );
-                    var wTop = -jQuery("#t #b .watchlist").height();
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', wTop);
-                }, 150);                
-            } else {                
-                jQuery(left).show();
-                if(typeof active_video !== 'undefined') { active_video.playVideo(); }
-                setTimeout(function(){
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', jQuery("#t #b .watchlist").width()+8);
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', -jQuery("#t #b .watchlist").height());
-                },150);
-            }             
-        }).resize();
-    },
-    /* Delete alert or error message from alerts tab in dashboard */
-    deleteAlert : function(id){
-        var answer = confirm('Are you sure you want to delete this alert? ');
-        if(answer){
-            var data = {
-                action: 'gp_delete_alert',
-                alert_id: id
-            };
-            jQuery.post(ajaxurl, data, function(response) {
-                jQuery("#t #b #messages-tab2 .content #"+id).css('visibility', 'hidden');
-            });
-        } else{
-            return false;
-        }
-    },
-    /* Dashboard initializiations */
-    init : function(){
-         //fix for watchlist min-width and max-width for ie9 and ie10
-        if (jQuery.browser.msie && jQuery.browser.version > 8.0) {
-            if ( jQuery(window).width() < 1283 && jQuery("#t #b .watchlist-wrap .right-pane").position().top != 0 ) {
-                setTimeout(function(){
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-left', jQuery("#t #b .watchlist").width());
-                    var wTop = -jQuery("#t #b .watchlist").height();
-                    jQuery("#t #b .watchlist-wrap .right-pane").css('margin-top', wTop);
-                }, 150);
-            }
-            jQuery("#t #b .watchlist").css('max-width','1392px');
-            jQuery("#t #b .watchlist").css('min-width','1072px');
-            jQuery("#t #b #btn-account-settings a").hover(function(){
-                    jQuery(this).css('margin-left', '0');
-            });
-            jQuery("#t #b #btn-account-settings .accordion-center").css('filter','none');                    
-            jQuery("#t #b #btn-account-settings a").css('width','auto');
-            jQuery("#t #b #btn-account-settings a").css('height','auto');
-            jQuery("#t #b #btn-account-settings .accordion-center").hover(function(){
-                    jQuery(this).css('width','99px');
-                    jQuery(this).css('padding-right','6px');
-                    jQuery(this).css('margin-left','0');
-                    jQuery(this).css('filter','none');
-                },
-                function(){                            
-                    jQuery(this).css('padding-right','3px');                                                        
-            });
-            jQuery("#t #b #btn-account-settings .accordion-left").css('top','0');
-            jQuery("#t #b #btn-account-settings .accordion-right").css('top','0');
-        } else if ( jQuery.browser.version != 7.0) {
-            jQuery("#t #b .watchlist .accordion-right").css("right", "-1px");
-            jQuery("#t #b .watchlist .accordion-center").css("height", "auto");        
-        }
-        
-        GrabPressDashboard.watchlist_binding(jQuery("#embed_id").val());
-        GrabPressDashboard.accordion_binding(jQuery("#environment").val(), jQuery("#embed_id").val());
-        GrabPressDashboard.onload_openvideo(jQuery("#embed_id").val());
-        jQuery('.nano').nanoScroller({
-            preventPageScrolling: true,
-            "alwaysVisible" : true
-        });                
-        jQuery(".feed_title").ellipsis(0, true, "", "");
-        //remove the titles from watchlist so we can desable tooltips
-        jQuery('.feed_title').removeAttr("title");
-        jQuery("#message").hide();//hack        
-        
-        jQuery("#help").simpletip({
-            content: 'Health displays “results/max results” per the latest feed update. <br/> Feeds in danger of not producing updates display in red or orange, feeds at risk of not producing updates display in yellow, and healthy feeds display in green.  <br /><br />', 
-            position: [0,30]
-        });        
-      
-        GrabPressDashboard.resize_browser_init();
-        GrabPressDashboard.collapse_menu();
-        jQuery( "#messages-tabs" ).tabs();
-    }
-}
+	/**
+	 * Class for handling the GrabPress Dashboard on the client side.
+	 *
+	 * @class GrabPressDashboard
+	 * @constructor
+	 */
+	GrabPressDashboard = {
+		// Define properties
+		activeVideo: null,
 
-jQuery(document).ready(
-    GrabPressDashboard.init()    
-); 
+		/* Watchlist accordion-like behavior */
+		/**
+		 * Handles accordion collapse/expand behavior
+		 * @param  {String} env     Environment
+		 * @param  {String} embedID Embed ID for player
+		 * @return {Boolean}         Returns false to prevent bubbling
+		 */
+		accordionBinding: function( env, embedID ) {
+			// Define vars
+			var accordionLock = false,
+					accordionToggle = $( '.accordion-toggle' ),
+					self = this
+			;
+
+			// On accordion toggle click
+			accordionToggle.on( 'click', function( e ) {
+				// Define vars
+				var monitor, slideDownCurrent,
+						anchor = $( this ),
+						panel = anchor.attr( 'href' ),
+						openPanels = $( '.accordion-group .accordion-body' ).not( '.collapse' )
+				;
+
+				// If accordion lock is true
+				if ( accordionLock ) {
+					// Prevent default behavior
+					e.preventDefault();
+					return false;
+				}
+
+				// If panel has collapse class
+				if ( panel.hasClass( 'collapse' ) ) {
+					// Set lock to true and monitor to false
+					accordionLock = true;
+					monitor = 0;
+
+					// Create slide down for current embed ID
+					slideDownCurrent = function( panel, onfinish ) {
+						// Define vars
+						var embed = $( '#gcontainer' + embedID );
+
+						// Remove embed but keep data stored locally in jQuery
+						embed.detach();
+
+						// Slide down
+						panel.slideDown( 400, 'linear', function() {
+							// Append embed HTML to accordion inner
+							panel.find('.accordion-inner').append( embed );
+
+							// Toggle collapse status
+							panel.toggleClass("collapse");
+
+							// Increment monitor
+							monitor++;
+
+							// Callback
+							onfinish( monitor );
+						});
+
+						// If open panels exist
+						if ( 0 < openPanels.length ) {
+							//
+							slideDownCurrent( panel, function() {
+								// After 100ms
+								setTimeout( function() {
+									// If monitor is 2
+									if ( 2 === monitor ) {
+										// Append grabDiv to embed
+										embed.append( '<div id="grabDiv' + embedID + '"></div>' );
+
+										// Configure active video player
+										this.activeVideo = new com.grabnetworks.Player({
+											'target': embed,
+											'id': embedID,
+											'width': '100%',
+											'height': '100%',
+											'content': anchor.data( 'guid' ),
+											'autoPlay': true
+										});
+
+										// Set accordion lock to false
+										accordionLock = false;
+									}
+								}, 100 );
+							});
+
+							// Slide up
+							openPanels.slideUp( 400, 'linear', function() {
+								// If active video exists
+								if ( self.activeVideo ) {
+									// Destroy active video
+									self.activeVideo.destroy();
+								}
+
+								// Toggle collapse
+								$( this ).toggleClass( 'collapse' );
+
+								// Increment monitor
+								monitor++;
+							});
+						} else { // No open panels
+							slideDownCurrent( panel, function() {
+								// Set accordion lock to false
+								accordionLock = false;
+							});
+						}
+					};
+				}
+
+				// Prevent default behavior
+				e.preventDefault();
+				return false;
+			});
+		},
+
+		/**
+		 * Handles Wordpress menu collapse event
+		 */
+		collapseMenu: function() {
+			// Define vars
+			var collapseMenu = $( '#collapse-menu' ),
+					rightPane = $( '#t #b .watchlist-wrap .right-pane' ),
+					watchlist = $( '#t #b .watchlist' )
+			;
+
+			// If browser is Safari or Chrome
+			if ( GrabPressUtils.browserIsSafari || GrabPressUtils.browserIsChrome ) {
+				// On collapse menu click
+				collapseMenu.on( 'click', function() {
+					// After 150ms
+					setTimeout( function() {
+						// Add margins to right pane
+						rightPane.css({
+							'margin-left': watchlist.width(),
+							'margin-top': -( watchlist.height() )
+						});
+					}, 150 );
+				});
+			}
+
+			// On collapse menu click
+			collapseMenu.on( 'click', function() {
+				// Define vars
+				var topRight = '-122px',
+						smallWidth = 1265,
+						adminMenuWrap = $( '#adminmenuwrap' ),
+						windowWidth = $( window ).width(),
+						watchlistPanel = $( '#t #b .watchlist .panel:first' ),
+						watchlist = $( '#t #b .watchlist' )
+				;
+
+				// After 300ms
+				setTimeout( function() {
+					// If admin menu wrap wider than 34px
+					if ( 34 > adminMenuWrap.width() ) {
+						smallWidth = 1147;
+					}
+
+					// If IE8
+					if ( GrabPressUtils.browserIsIE() && 8.0 === GrabPressUtils.getIEVersion() ) {
+						// Add 16px top margin to right pane
+						topRight = '16px';
+					}
+
+					// If window width smaller than  min width
+					if( windowWidth < smallWidth ) {
+						// Hide watchlist panel
+						watchlistPanel.hide();
+
+						// After 150ms
+						setTimeout( function() {
+							// Update right pane margins
+							rightPane.css({
+								'margin-left': '8px',
+								'margin-top': topRight
+							});
+						}, 150 );
+					} else { // Window larger enough to accommodate watchlist panel
+						// Show watchlist panel
+						watchlistPanel.show();
+
+						// After 150ms
+						setTimeout( function() {
+							// Update right pane margins
+							rightPane.css({
+								'margin-left': watchlist.width() + 8,
+								'margin-top': -( watchlist.height() )
+							});
+						}, 150 );
+					}
+				}, 300 );
+			});
+		},
+
+		/* Delete alert or error message from alerts tab in dashboard */
+		/**
+		 * Deletes an alert or error message from the alerts tab in dashboard by
+		 * ID
+		 * @param  {String} id ID of the alert or error message to be deleted
+		 * @return {Boolean}    Returns false if the action is not confirmed
+		 */
+		deleteAlert: function( id ) {
+			// Define vars
+			var data,
+					confirmed = confirm( 'Are you sure you want to delete this alert?' ),
+					messageTab = $( '#t #b #messages-tab2 .content #' + id )
+			;
+
+			// If delete action is confirmed by user
+			if( confirmed ) {
+				// Build data object
+				data = {
+					action: 'gp_delete_alert',
+					alert_id: id
+				};
+
+				// Delete alert via AJAX
+				$.post( ajaxurl, data, function( response ) {
+					// Hide message tab
+					messageTab.css( 'visibility', 'hidden' );
+				});
+			} else { // Not confirmed
+				// Return false to prevent deletion from happening
+				return false;
+			}
+		},
+
+		/**
+		 * Initialize dashboard
+		 */
+		init: function() {
+			// Define vars
+			var $window = $( window ),
+					windowWidth = $window.width(),
+					rightPane = $( '#t #b .watchlist-wrap .right-pane' ),
+					watchlist = $( '#t #b .watchlist' ),
+					accountSettingsBtn = $( '#t #b #btn-account-settings a' ),
+					accountSettingsBtnCenter = $( '#t #b #btn-account-settings .accordion-center' ),
+					accountSettingsBtnLeft = $( '#t #b #btn-account-settings .accordion-left' ),
+					accountSettingsBtnRight = $( '#t #b #btn-account-settings .accordion-right' ),
+					accordionRight = $( '#t #b .watchlist .accordion-left' ),
+					accordionCenter = $( '#t #b .watchlist .accordion-center' ),
+					embedID = $( '#embed_id' ).val(),
+					env = $( '#environment' ).val(),
+					nano = $( '.nano' ),
+					feedTitle = $( '.feed-title' ),
+					message = $( '#message' ),
+					messageTabs = $( '#messages-tabs' ),
+					help = $( '#help' )
+			;
+
+			// If IE9+
+			if ( GrabPressUtils.browserIsIE() && 8.0 < GrabPressUtils.getIEVersion() ) {
+				// If window width is less than 1283 right pane position top not = 0
+				if ( 1283 > windowWidth && rightPane.position().top ) {
+					// After 150ms
+					setTimeout( function() {
+						// Update rightpane margins
+						rightPane.css({
+							'margin-left': watchlist.width(),
+							'margin-top': -( watchlist.height() )
+						});
+					}, 150 );
+				}
+
+				// Set max/min width for watchlist
+				watchlist.css({
+					'max-width': '1392px',
+					'min-width': '1072px'
+				});
+
+				// On account settings button hover
+				accountSettingsBtn.on( 'hover', function() {
+					// Remove left margin from button
+					$( this ).css( 'margin-left', '0' );
+				});
+
+				// Remove filters from center of account settings button
+				accountSettingsBtnCenter.css( 'filter', 'none' );
+
+				// Update account settings button dimensions
+				accountSettingsBtn.css({
+					width: 'auto',
+					height: 'auto'
+				});
+
+				// On account settings button center hover
+				accountSettingsBtnCenter.on( 'hover', function() { // In
+					// Define vars
+					var $this = $( this );
+
+					$this.css({
+						width: '99px',
+						filter: 'none',
+						'padding-right': '6px',
+						'margin-left': '0'
+					});
+				}, function() { // Out
+					$( this ).css( 'padding-right', '3px' );
+				});
+
+				// Remove top position from account settings button left/right
+				accountSettingsBtnLeft.css( 'top', '0' );
+				accountSettingsBtnRight.css( 'top', '0' );
+			} else if ( 7.0 !== GrabPressUtils.getIEVersion ) { // If not IE7
+				// Update accordion right position
+				accordionRight.css( 'right', '-1px' );
+
+				// Update accordion center height
+				accordionCenter.css( 'height', 'auto' );
+			}
+
+			// Attach event bindings
+			this.watchlistBinding( embedID );
+			this.accordionBinding( env, embedID );
+
+			// Load video
+			this.onloadOpenVideo( embedID );
+
+			// Setup nanoscroller (OS X style scrollbars)
+			nano.nanoScroller({
+				preventPageScrolling: true,
+				alwaysVisible: true
+			});
+
+			// Auto-ellipsis title and remove title class
+			feedTitle
+				.ellipsis( 0, true, '', '' )
+				.removeAttr( 'title' ) // To disable tool tips
+			;
+
+			// Labeled as "hack" in original code
+			message.hide();
+
+			// Attach simpletip to help
+			help.simpletip({
+				content: 'Health displays "results/max results" per the latest feed update. <br /> Feeds in danger of not producing updates display in red or orange, feeds at risk of not producing updates display in yellow, and healthy feeds display in green.  <br /><br />',
+				position: [ 0, 30 ]
+			});
+
+			// Attach resize browser and collapse menu bindings
+			this.resizeBrowserInit();
+			this.collapseMenu();
+
+			// Attach Bootstrap tabs UI to message tabs
+			messageTabs.tabs();
+		},
+
+		/**
+		 * Displays the first video from the watchlist
+		 * @param  {String} embedID Embed ID of the video
+		 * @return {Boolean}         Returns false if accordion warning exists
+		 */
+		onloadOpenVideo: function( embedID ) {
+			// Define vars
+			var accordionWarning = $( '.accordion-warning' ),
+					accordionToggle = $( '.accordion-toggle[href="#collapse1"]' ),
+					embed = '',
+					anchor = $( accordionToggle[0] ),
+					collapse1 = $( '#collapse1' ),
+					accordionInner = collapse1.find( '.accordion-inner' )
+			;
+
+			// If accordion warning exists
+			if ( 1 == accordionWarning.length ) {
+				// Do not open video
+				return false;
+			}
+
+			// Build embed HTML
+			embed  = '<div id="gcontainer' + embedID + '" style="height: 100%;">\n';
+			embed += '	<div id="grabDiv' +embedID + '"></div>\n';
+			embed += '</div>';
+
+			// Append embed HTML into accordion inner
+			accordionInner.append( embed );
+
+			// Configure active video player
+			this.activeVideo = new com.grabnetworks.Player({
+				'id': embedID,
+				'width': '100%',
+				'height': '100%',
+				'content': anchor.data( 'guid' ),
+				'autoPlay': false
+			});
+
+			// Toggle collapse class on collapse1
+			collapse1.toggleClass( 'collapse' );
+		},
+
+		/**
+		 * Resize watchlist accordion height based on its width maintaining aspect
+		 * ratio
+		 * @return {[type]} [description]
+		 */
+		resizeAccordion: function() {
+			// Define vars
+			var accordionCenter = $( '.accordion-center' ),
+					accordionInner = $( '.accordion-inner' ),
+					width = accordionCenter.filter( ':first' ).width()
+			;
+
+			// Resize accordion
+			accordionInner.css( 'height', width * 0.5625 );
+		},
+
+		/**
+		 * Handle window resize events
+		 */
+		resizeBrowserInit: function() {
+			// Define vars
+			var adminMenuWrap = $( '#adminmenuwrap' ),
+					nano = $( '.nano' ),
+					$window = $( window ),
+					windowWidth = $window.width(),
+					rightPane = $( '#t #b .watchlist-wrap .right-pane' ),
+					watchlist = $( '#t #b .watchlist' ),
+					self = this
+			;
+
+			// On window resize
+			$window.on( 'resize', function() {
+				// Define vars
+				var left,
+						smallWidth = 1265,
+						topRight = '-122px'
+				;
+
+				// After 150ms
+				setTimeout( function() {
+					// Resize accordion
+					self.resizeAccordion();
+				}, 150 );
+
+				// If admin menu wrap width is less than 34 (collapsed)
+				if ( 34 > adminMenuWrap.width() ) {
+					// Set small width to 1147px
+					smallWidth = 1147;
+				}
+
+				// If IE8
+				if ( GrabPressUtils.browserIsIE() && 8.0 === GrabPressUtils.getIEVersion() ) {
+					// Set watchlist as left
+					left = $( '#t #b .watchlist' );
+
+					// Update right pane top margin
+					topRight = '16px';
+
+					// After 150ms
+					setTimeout( function() {
+						// Setup nanoscroller (OS X style scrollbars)
+						nano.nanoScroller({
+							preventPageScrolling: true,
+							alwaysVisible: true
+						});
+					});
+				} else { // Not IE8
+					// Set watchlist panel as left
+					left = $( '#t #b .watchlist .panel:first' );
+				}
+
+				// If window width less than small width (min)
+				if ( windowWidth < smallWidth ) {
+					// Hide watchlist
+					left.hide();
+
+					// If active video not undefined
+					if( self.activeVideo ) {
+						// Pause video
+						self.activeVideo.pauseVideo();
+					}
+
+					// After 150ms
+					setTimeout( function() {
+						// Update right pane margins
+						rightPane.css({
+							'margin-left': '8px',
+							'margin-top': topRight
+						});
+					}, 150 );
+					// If browser is, IE9+, Chrome, Safari or Opera and window width is
+					// less than 1283px
+				} else if ( ( ( GrabPressUtils.browserIsIE() && 8.0 < GrabPressUtils.getIEVersion() ) || GrabPressUtils.browserIsChrome || GrabPressUtils.browserIsSafari || GrabPressUtils.browserIsOpera ) && 1283 > windowWidth && rightPane.position().top ) {
+					// Show watchlist
+					left.show();
+
+					// If active video is not undefined
+					if ( self.activeVideo ) {
+						// Play video
+						self.activeVideo.playVideo();
+					}
+
+					// After 150ms
+					setTimeout( function() {
+						// Update right pane margins
+						rightPane.css({
+							'margin-left': watchlist.width() + 8,
+							'margin-top': -( watchlist.height() )
+						});
+					}, 150 );
+				} else { // If IE7 or lower, or a non-major browser
+					// Show watchlist
+					left.show();
+
+					// If active video not undefined
+					if ( self.activeVideo ) {
+						// Play video
+						self.activeVideo.playVideo();
+					}
+
+					// After 150ms
+					setTimeout( function() {
+						// Update right pane margins
+						rightPane.css({
+							'margin-left': watchlist.width() + 8,
+							'margin-top': -( watchlist.height() )
+						});
+					}, 150 );
+				}
+			}).resize(); // Trigger resize event
+		},
+
+		/**
+		 * Setup display/hide bindings for watchlist button
+		 * @param  {String} embedID Embed ID for video
+		 */
+		watchlistBinding: function( embedID ) {
+			// Define vars
+			var watchlistCheck = $( '.watchlist-check' );
+
+			// On watchlist check click
+			watchlistCheck.on( 'click', function() {
+				// Define vars
+				var watchlist, data,
+						id = this.id.replace( 'watchlist-check-', '' ),
+						$this = $( this )
+				;
+
+				// If clicked watchlist value is 1
+				if ( "1" == $this.val() ) {
+					// Set watchlist true
+					watchlist = 1;
+				} else {
+					// Set watchlist false
+					watchlist = 0;
+				}
+
+				// Build data object
+				data = {
+					action: 'gp_toggle_watchlist',
+					feed_id: id,
+					watchlist: watchlist
+				};
+
+				// Get accordion content via AJAX
+				$.post( ajaxurl, data, function( response ) {
+					// Define vars
+					var parsedJSON = $.parseJSON( response ),
+							accordion = '',
+							results = parsedJSON.results,
+							style = '',
+							embed = '',
+							collapse = 'collapse',
+							accordion2 = $( '#accordion2' ),
+							rightPane = $( '#t #b .right-pane' ),
+							watchlist = $( '#t #b .watchlist' )
+					;
+
+					// If results exist
+					if ( results && results.length > 0 ) {
+						// Loop through each result
+						for ( var i = 0; i < results.length; i++ ) {
+							// If valid
+							if ( results[ i ] ) {
+								// reset value
+								style = "";
+								embed = "";
+
+								// If not first result
+								if ( 0 != i ) {
+									// Don't display
+									style = 'style="display:none;"';
+								} else { // Is first result
+									// Build embed HTML
+									embed  = '<div id="gcontainer' + embedID + '" style="height: 100%;">\n';
+									embed += '	<div id="grabDiv' + embedID + '"></div>\n';
+									embed += '</div>\n';
+
+									// Update collapse
+									collapse = '';
+								}
+
+								// Build accordion HTML
+								accordion += '<div class="accordion-group">\n';
+								accordion += '	<div class="accordion-heading">\n';
+								accordion += '		<div class="accordion-left"></div>\n';
+								accordion += '		<div class="accordion-center">\n';
+								accordion += '			<a class="accordion-toggle feed-title" data-guid="v' + results[ i ].video.guid + '" data-toggle="collapse" data-parent="#accordion2" href="#collapse' + ( i + 1 ) + '">' + results[ i ].video.title + '</a>\n';
+								accordion += '		</div>\n';
+								accordion	+= '		<div class="accordion-right"></div>\n';
+								accordion += '	</div>\n';
+								accordion += '	<div id="collapse' + ( i + 1 ) + '" class="accordion-body ' + collapse + ' in" ' + style + '>\n';
+								accordion += '		<div class="accordion-inner">\n';
+								accordion += '			' + embed;
+								accordion += '		</div>\n';
+								accordion += '	</div>\n';
+								accordion += '</div>\n';
+							}
+						}
+
+						// Add accordion HTML to accordion2
+						accordion2.html( accordion );
+
+						// Configure active video player
+						this.activeVideo = new com.grabnetworks.Player({
+							'id': embedID,
+							'width': '100%',
+							'height': '100%',
+							'content': results[ 0 ].video.guid,
+							'autoPlay': false
+						});
+
+						// Trigger window resize event
+						$( window ).resize();
+
+						// Toggle visiblity of active video
+						$( '#gcontainer' + embedID + ' object' ).css('visibility','visible');
+					} else { // No results
+						// Build accordion with warning
+						accordion += '<div class="accordion-group">\n';
+						accordion += '	<div class="accordion-heading">\n';
+						accordion += '		<div class="accordion-left"></div>\n';
+						accordion += '		<div class="accordion-center">\n';
+						accordion += '			&nbsp;\n';
+						accordion += '		</div>\n';
+						accordion	+= '		<div class="accordion-right"></div>\n';
+						accordion += '	</div>\n';
+						accordion += '	<div id="collapse1" class="accordion-body" style="height:95px;">\n';
+						accordion += '		<div class="accordion-inner">\n';
+						accordion += '			<span class="accordion-warning">Add a feed to your watch list in the Feed Activity panel</span>\n';
+						accordion += '		</div>\n';
+						accordion += '	</div>\n';
+						accordion += '</div>\n';
+
+						// Add accordion html to accordion2
+						accordion2.html( accordion );
+					}
+
+					// After 300ms
+					setTimeout( function() {
+						$( window ).resize();
+						// Update right pane dimensions based on watchlist dimensions
+						rightPane.css({
+							'margin-left': watchlist.width(),
+							'margin-top': watchlist.height()
+						});
+					}, 300 );
+
+					// If watchlist check is true
+					if ( $this.val() == "1" ) {
+						// Toggle watch on
+						$this
+							.val( '0' )
+							.addClass( 'watch-on' )
+							.removeClass( 'watch-off' )
+						;
+					} else { // Watchlist false
+						// Toggle watch off
+						$this
+							.val( '1' )
+							.addClass( 'watch-off' )
+							.removeClass( 'watch-on' )
+						;
+					}
+				});
+			});
+		}
+	}; // End GrabPressDashboard
+
+	// DOM ready
+	$(function() {
+		// Initialize GrabPressDashboard class
+		GrabPressDashboard.init();
+	});
+
+})(jQuery); // End $ scope

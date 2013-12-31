@@ -1,9 +1,9 @@
 === GrabPress ===
-Contributors: grabmedia
-Tags: video, grab, autoposter, grab press, grab media, grab-media, grab networks, video catalog, media, video feed, video player, video content, professional video, ad revenue
-Requires at least: 3.4   
-Tested up to: 3.5  
-Stable tag: 2.3.4
+Contributors: grabmedia, blinkxdev
+Tags: video, grab, autoposter, blinkx, blinkx video advantage, grab press, grab media, grab-media, grab networks, video catalog, media, video feed, video player, video content, professional video, ad revenue
+Requires at least: 3.7.1   
+Tested up to: 3.7.1  
+Stable tag: 2.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,7 +11,7 @@ Configure Grab's AutoPoster software to deliver fresh video direct to your Blog.
 
 == Description ==
 
-GrabPress from Grab Media is the solution for publishers on the Wordpress platform using video to drive engagement and revenue on their sites. It allows website editors to publish high quality video content within their Wordpress sites. The integration of the Grab Media video catalog with your content management system via the GrabPress plug-in enables all assets of the content catalog-including the video titles, descriptions, keywords, and preview images to be published along with the video content, or to be leveraged in content promotional themes and widgets.
+GrabPress from Grab Media, a blinkx company, is the solution for publishers on the Wordpress platform using video to drive engagement and revenue on their sites. It allows website editors to publish high quality video content within their Wordpress sites. The integration of the Grab Media video catalog with your content management system via the GrabPress plug-in enables all assets of the content catalog-including the video titles, descriptions, keywords, and preview images to be published along with the video content, or to be leveraged in content promotional themes and widgets.
 
 By automating video delivery GrabPress cuts the legwork needed to ensure a sound video strategy on your site. Whether you run your own site, or work with a team of editors, it can be tricky to get on the same page regarding video. GrabPress is built to ease those pains, and provide a dependable work-flow editors can leverage into larger revenue streams.
 
@@ -20,6 +20,7 @@ Beyond delivery of premium content, work-flow optimization, and revenue through 
 For additional documentation, contact your account manager or email us at support@grab-media.com for more assistance.  
 
 www.grab-media.com
+www.blinkx.com
 
 == Installation ==  
 
@@ -176,6 +177,48 @@ We hope to allow users to edit the layout / posting template in future updates o
 
 == Changelog ==  
 
+= 2.3.5 =
+*Features:*
+
+ * GBPS-4: Ensure all features are compatible with WordPress v3.6
+ * GBPS-5: As a WordPress VIP user, I want to use GrabPress for video content on my site
+
+*Bug Fixes:*
+
+ * GBPS-6: All values returned from the Autoposter, Catalog, and WordPress APIs need to have all special characters escaped
+ * GBPS-8: Thumbnail download and insertion should use more of the WordPress API to prevent bugs and compatibility issues on WordPress.com
+ * GBPS-9: ALL URI paths to the plugin should use the plugins_url function to resolve properly across the platform
+ * GBPS-10: Ensure that unused files are not being loaded
+ * GBPS-11: Verify that the correct WordPress API hooks are used across the plugin
+ * GBPS-12: Eliminate loading of any unused JavaScript files and code
+ * GBPS-13: Verify that all prefixes for page slugs, Ajax actions, and the like are in place
+ * GBPS-14: Script tags should not be enabled with TinyMCE
+ * GBPS-15: All AJAX callbacks need to have proper capability and nonce checks
+ * GBPS-16: Ensure that all calls to register_settings have a sanitize_callback to clean up the data before it's saved
+ * GBPS-17: Remove GrabPress::allow_tags and GrabPress:: mce_settings
+ * GBPS-18: Remove methods/API calls that are not allowed in WordPress VIP: get_wordpress_plugins and report_versions
+ * GBPS-19: Any methods using the 'curl', 'file_get_contents' and 'GrabPressAPI' need to be changed to use the WordPress HTTP API
+ * GBPS-21: All AJAX callbacks need to properly sanitize the REQUEST data passed in
+ * GBPS-22: Remove methods/API calls that are not allowed in WordPress VIP: enable_xmlrpc
+ * GBPS-29: Support for the minimum version of PHP required by WordPress
+ * GBPS-62: Create post button on catalog page is not working
+ * GBPS-63: Unable to watch videos in the Catalog search results screen
+ * GBPS-65: There is no way to close the preview window in the Autoposter screen
+ * GBPS-74: As a WP VIP user, I want all my plugins to adhere to WordPress Coding Standards
+ * GBPS-78: Make GrabPress adhere to all WordPress HTML Coding Standards
+ * GBPS-79: Make GrabPress adhere to all WordPress CSS Coding Standards
+ * GBPS-80: Make GrabPress adhere to all WordPress JS Coding Standards
+ * GBPS-117: Verify GrabPress works with WordPress 3.7.1
+ * GBPS-123: As a user, I need the AutoPoster API key deleted from my WordPress instance database when I delete the GrabPress plugin from my WP Admin plugin manager
+ * GBPS-126: Unable to save feed on Autoposter page
+ * GBPS-129: Unable to link Grab Media Publisher Account on Account Tab 
+ * GBPS-133: Unable to unlink the existing account
+ * GBPS-134: Manage feeds: Preview button is not functional
+ * GBPS-138: Edit feed page: Post author drop down values which were displayed during create feeds becomes blank during edit mode
+ * GBPS-139: In preview feed popup window, Close(X) button is partially truncated/not accessible
+ * GBPS-149: Catalog > Create Post button does not take use to the Edit Post page (with selected video)
+ * GBPS-152: Posts > Insert Into Post is not working
+
 = 2.3.4 =
 *Features:*
 
@@ -293,6 +336,5 @@ We hope to allow users to edit the layout / posting template in future updates o
  
 *Bug Fixes:*
 
- * AUTO-408: When I create a feed using a category with spaces, I do not reveieve any posts.
+ * AUTO-408: When I create a feed using a category with spaces, I do not revieve any posts.
  * AUTO-405: After installing the GrabPress plug-in, my media tab from the admin menu disappears.
-
