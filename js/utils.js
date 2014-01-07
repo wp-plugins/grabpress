@@ -3,15 +3,15 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.4.1-06252013
+ * Version: 2.3.6
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPL2
+ * License: GPLv2 or later
  */
 
 /**
- * Copyright 2012 Grab Networks Holdings, Inc.
- * (email: licensing@grab-media.com)
+ * Copyright 2014 blinkx, Inc.
+ * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2, as

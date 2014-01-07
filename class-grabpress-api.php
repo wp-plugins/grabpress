@@ -208,16 +208,18 @@ if ( ! class_exists( 'Grabpress_API' ) ) {
 			$role = 'editor'; // Minimum for auto-publish (author)
 
 			// Get current logged in user
-			Grabpress::get_user_by('login');
+			$grab_user = Grabpress::get_user_by('login');
 
 			// If user exists
 			if ( isset( $user_data ) ) {
 				// Create message to be outputted
 				$msg = 'User Exists (' . $user_login . '): ' . $user_data->user->id;
+			}
 
+			if ( $grab_user !== false ) {
 				// Build user data array
 				$user = array(
-					'id'            => $user_data->user->id,
+					'ID'            => $grab_user->id,
 					'user_login'    => $user_login,
 					'user_nicename' => $user_nicename,
 					'user_url'      => $user_url,
@@ -230,6 +232,11 @@ if ( ! class_exists( 'Grabpress_API' ) ) {
 					'description'   => $description,
 					'role'          => $role,
 				);
+
+				// Update user info in WPDB and get user ID for user changed
+				// Has to use wp_update_user instead of wp_insert_user because wp_inset_user does not encrypt password as of wp3.7.1
+				$user_id = wp_update_user( $user );
+
 			} else { // User doesnt exist, store password with new data
 				// Build user data array
 				$user = array(
@@ -245,10 +252,10 @@ if ( ! class_exists( 'Grabpress_API' ) ) {
 					'description'   => $description,
 					'role'          => $role,
 				);
-			}
 
-			// Insert/update user info in WPDB and get user ID for user changed
-			$user_id = wp_insert_user( $user );
+				// Insert user info in WPDB and get user ID for user changed
+				$user_id = wp_insert_user( $user );
+			}
 
 			// If no user ID returned
 			if ( ! isset( $user_id ) ) {
@@ -1064,6 +1071,15 @@ if ( ! class_exists( 'Grabpress_API' ) ) {
 
 			// Try fetching XML via WP HTTP request
 			try {
+				// Temp fix for redirecting to the created post
+				// Added so automated tests work correctly
+				// remove as needed, but make sure automated tests
+				// continue to work (CatalogTests.test_catalog_2_create_post_from_catalog_search)
+				if ( !isset ($args)){
+					$args = array();
+				}
+				// End temp fix
+
 				// Make request
 				$response = wp_remote_get( $request_url, $args );
 

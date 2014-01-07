@@ -30,7 +30,7 @@
 											<div class="accordion-group">
 												<div class="accordion-heading">
 													<div class="accordion-left"></div>
-													<div class="accordion-center">&nbsp;</div>
+													<div class="accordion-center"><span class="accordion-toggle">&nbsp;</span></div>
 													<div class="accordion-right"></div>
 												</div>
 												<div id="collapse<?php echo $i;?>" class="accordion-body" style="height:95px;">
@@ -49,7 +49,7 @@
 													<div class="accordion-right"></div>
 												</div>
 												<div id="collapse<?php echo $i;?>" class="accordion-body collapse in" style="<?php echo esc_attr( 1 == $i ? '': 'display:none;' ); ?>">
-													<div class="accordion-inner"></div>
+													<div class="accordion-inner accordion-inner-ie"></div>
 												</div>
 											</div>
 										<?php $i++; } } ?>

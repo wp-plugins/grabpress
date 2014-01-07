@@ -21,11 +21,7 @@
 			?>
 				<input type="hidden"  name="feed_id" value="<?php echo $feed_id; ?>" />
 			<?php } ?>
-			<?php if ( isset( $form['active'] ) ) {
-				$active = $form['active'];
-			?>
-				<input type="hidden"  name="active" value="<?php echo esc_attr( $active ); ?>" />
-			<?php } ?>
+			
 			<?php
 				if ( isset( $form['referer'] ) ) {
 					$referer = ($form['referer'] == 'edit') ? 'edit' : 'create';
@@ -65,6 +61,21 @@
 						<span class="description">A unique name of 6-14 characters. We encourage customizing it.</span>
 					</td>
 				</tr>
+				<?php 
+				if(( 1 == $form['active'] ) ||('default' == $form['action'] ))
+				$active_feed = 'selected="selected"';
+				else
+				$Inactive_feed = 'selected="selected"';
+				?>
+			<tr valign="bottom">
+					<th scope="row">Active</th>
+					<td>
+					<select name="active" id ="active-feed" class="active-feed" style="width:90px;">
+					<option value="1" <?php echo $active_feed; ?> > Yes</option>
+					<option value="0" <?php echo $Inactive_feed; ?> > No</option>
+					</select>
+					</td>
+			</tr>
 				<tr valign="bottom">
 					<th scope="row">Grab Video Categories<span class="asterisk">*</span></th>
 					<td>
@@ -82,9 +93,8 @@
 								}
 
 								// In the edit mode, video categories may return nothing if all options are selected
-								$selectedAllVideoCategories = false;
 								if( $is_edit && isset( $form['channels'] ) && count( $form['channels'] ) == 1 && empty( $form['channels'][0]) ) {
-									$selectedAllVideoCategories = true;
+									$channels = array();
 								}
 
 								foreach ( $list_channels as $record ) {
@@ -92,7 +102,7 @@
 									$name = $channel->name;
 									$id = $channel->id;
 
-									if ( $is_edit && $selectedAllVideoCategories == false ) {
+									if ( count( $channels ) > 0 ) {
 										$selected = ( in_array( $name, $channels ) ) ? 'selected="selected"' : '';
 									} else {
 										$selected = 'selected="selected"';
@@ -139,18 +149,22 @@
 						<select name="providers[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php esc_attr( Grabpress::outline_invalid() ); ?>" onchange="GrabPressAutoposter.doValidation()">
 							<?php
 
+								$providers = array();
+								if( isset( $form['providers'] ) && is_array( $form['providers'] ) ) {
+									$providers = $form['providers'];
+								}
+
 								// In the edit mode, content providers return nothing if all options are selected
-								$selectedAllProvides = false;
-								if( $is_edit && isset( $form['providers'] ) && count( $form['providers'] ) == 1 && empty( $form['providers'][0]) ) {
-									$selectedAllProvides = true;
+								if( $is_edit && isset( $form['providers'] ) && count( $form['providers'] ) == 1 && empty( $form['providers'][0] ) ) {
+									$providers = array();
 								}
 
 								foreach ( $list_providers as $record_provider ) {
 									$provider = $record_provider->provider;
 									$provider_name = $provider->name;
 									$provider_id = $provider->id;
-									if ( $is_edit && $selectedAllProvides == false ) {
-										$provider_selected = ( in_array( $provider_id, $form['providers'] ) ) ? 'selected="selected"' : '';
+									if ( count( $providers ) > 0 ) {
+										$provider_selected = ( in_array( $provider_id, $providers ) ) ? 'selected="selected"' : '';
 									} else {
 										$provider_selected = 'selected="selected"';
 									}

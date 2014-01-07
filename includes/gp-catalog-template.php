@@ -44,7 +44,6 @@
 ?>
 <form method="post" id="form-catalog-page">
 	<input type="hidden" id="environment" name="environment" value="<?php echo esc_attr( Grabpress::$environment ); ?>" />
-	<input type="hidden" id="" name="action" value="catalog-search" />
 	<input type="hidden" id="action-catalog" name="action" value="catalog-search" />
 	<input type="hidden" id="list_provider" name="list_provider" value="<?php echo esc_attr( serialize( $list_providers ) ); ?>" />
 	<input type="hidden" name="pre_content" value="Content"  id="pre_content" />

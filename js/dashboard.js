@@ -3,15 +3,15 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.4.1-06252013
+ * Version: 2.3.6
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPL2
+ * License: GPLv2 or later
  */
 
 /**
- * Copyright 2012 Grab Networks Holdings, Inc.
- * (email: licensing@grab-media.com)
+ * Copyright 2014 blinkx, Inc.
+ * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2, as
@@ -59,11 +59,11 @@ var GrabPressDashboard;
 			;
 
 			// On accordion toggle click
-			accordionToggle.on( 'click', function( e ) {
+			accordionToggle.die( 'click' ).live( 'click', function( e ) {
 				// Define vars
 				var monitor, slideDownCurrent,
 						anchor = $( this ),
-						panel = anchor.attr( 'href' ),
+						panel = $( anchor.attr( 'href' ) ),
 						openPanels = $( '.accordion-group .accordion-body' ).not( '.collapse' )
 				;
 
@@ -102,55 +102,55 @@ var GrabPressDashboard;
 							// Callback
 							onfinish( monitor );
 						});
-
-						// If open panels exist
-						if ( 0 < openPanels.length ) {
-							//
-							slideDownCurrent( panel, function() {
-								// After 100ms
-								setTimeout( function() {
-									// If monitor is 2
-									if ( 2 === monitor ) {
-										// Append grabDiv to embed
-										embed.append( '<div id="grabDiv' + embedID + '"></div>' );
-
-										// Configure active video player
-										this.activeVideo = new com.grabnetworks.Player({
-											'target': embed,
-											'id': embedID,
-											'width': '100%',
-											'height': '100%',
-											'content': anchor.data( 'guid' ),
-											'autoPlay': true
-										});
-
-										// Set accordion lock to false
-										accordionLock = false;
-									}
-								}, 100 );
-							});
-
-							// Slide up
-							openPanels.slideUp( 400, 'linear', function() {
-								// If active video exists
-								if ( self.activeVideo ) {
-									// Destroy active video
-									self.activeVideo.destroy();
-								}
-
-								// Toggle collapse
-								$( this ).toggleClass( 'collapse' );
-
-								// Increment monitor
-								monitor++;
-							});
-						} else { // No open panels
-							slideDownCurrent( panel, function() {
-								// Set accordion lock to false
-								accordionLock = false;
-							});
-						}
 					};
+
+					// If open panels exist
+					if ( 0 < openPanels.length ) {
+						//
+						slideDownCurrent( panel, function() {
+							// After 100ms
+							setTimeout( function() {
+								// If monitor is 2
+								if ( 2 === monitor ) {
+									// Append grabDiv to embed
+									var embed = $( "#gcontainer" + embedID ).append( '<div id="grabDiv' + embedID + '"></div>' );
+
+									// Configure active video player
+									self.activeVideo = new com.grabnetworks.Player({
+										'target': embed,
+										'id': embedID,
+										'width': '100%',
+										'height': '100%',
+										'content': anchor.data( 'guid' ),
+										'autoPlay': true
+									});
+
+									// Set accordion lock to false
+									accordionLock = false;
+								}
+							}, 100 );
+						});
+
+						// Slide up
+						openPanels.slideUp( 400, 'linear', function() {
+							// If active video exists
+							if ( self.activeVideo ) {
+								// Destroy active video
+								$( "#gcontainer" + embedID ).html("");
+							}
+
+							// Toggle collapse
+							$( this ).toggleClass( 'collapse' );
+
+							// Increment monitor
+							monitor++;
+						});
+					} else { // No open panels
+						slideDownCurrent( panel, function() {
+							// Set accordion lock to false
+							accordionLock = false;
+						});
+					}
 				}
 
 				// Prevent default behavior
@@ -357,8 +357,7 @@ var GrabPressDashboard;
 			}
 
 			// Attach event bindings
-			this.watchlistBinding( embedID );
-			this.accordionBinding( env, embedID );
+			this.watchlistBinding( env, embedID );
 
 			// Load video
 			this.onloadOpenVideo( embedID );
@@ -390,6 +389,9 @@ var GrabPressDashboard;
 
 			// Attach Bootstrap tabs UI to message tabs
 			messageTabs.tabs();
+
+			// Attach playlist event
+			this.accordionBinding( env, embedID );
 		},
 
 		/**
@@ -570,7 +572,7 @@ var GrabPressDashboard;
 		 * Setup display/hide bindings for watchlist button
 		 * @param  {String} embedID Embed ID for video
 		 */
-		watchlistBinding: function( embedID ) {
+		watchlistBinding: function( env, embedID ) {
 			// Define vars
 			var watchlistCheck = $( '.watchlist-check' );
 
@@ -621,6 +623,7 @@ var GrabPressDashboard;
 								// reset value
 								style = "";
 								embed = "";
+								collapse = "collapse";
 
 								// If not first result
 								if ( 0 != i ) {
@@ -679,7 +682,7 @@ var GrabPressDashboard;
 						accordion += '		<div class="accordion-center">\n';
 						accordion += '			&nbsp;\n';
 						accordion += '		</div>\n';
-						accordion	+= '		<div class="accordion-right"></div>\n';
+						accordion += '		<div class="accordion-right"></div>\n';
 						accordion += '	</div>\n';
 						accordion += '	<div id="collapse1" class="accordion-body" style="height:95px;">\n';
 						accordion += '		<div class="accordion-inner">\n';
@@ -718,6 +721,9 @@ var GrabPressDashboard;
 							.removeClass( 'watch-on' )
 						;
 					}
+
+					// Update the binding
+					GrabPressDashboard.accordionBinding( env, embedID );
 				});
 			});
 		}

@@ -77,7 +77,8 @@
 							<?php
 								$video_categories_array = explode( ',', $url['categories'] );
 								$video_categories_num = count( $video_categories_array );
-								if ( ! $url['categories'] ) {
+								$channels_num = ( ! empty( $list_channels ) ) ? count( $list_channels ) : 0;
+								if ( ! $url['categories'] || $video_categories_num == $channels_num ) {
 									echo "All Video Categories";
 								} else if( 1 == $video_categories_num ) {
 									echo $video_categories = ( $video_categories_num > 15 ) ? substr( $url['categories'], 0, 15) . '...' : $url['categories'];

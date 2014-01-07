@@ -3,15 +3,15 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.4.1-06252013
+ * Version: 2.3.6
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPL2
+ * License: GPLv2 or later
  */
 
 /**
- * Copyright 2012 Grab Networks Holdings, Inc.
- * (email: licensing@grab-media.com)
+ * Copyright 2014 blinkx, Inc.
+ * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2, as
@@ -355,6 +355,7 @@ var GrabPressAutoposter;
 					providersDropdownUpdate = $( '#provider-select-update' ),
 					updateBtn = $( '.btn-update' ),
 					scheduleDropdown = $( '.schedule-select' ),
+					activeFeed = $( '.active-feed' ),	
 					limitDropdown = $( '.limit-select' ),
 					authorDropdown = $( '.author-select' ),
 					learnMore = $( '#learn-more' ),
@@ -420,7 +421,7 @@ var GrabPressAutoposter;
 					window.location = "admin.php?page=gp-autoposter";
 				} else { // Other referer
 					// Redirect to edit feed page using feed ID
-					window.location = "admin.php?page=gp-autoposter&action=edit-feed&feed_id=" + feedID;
+					window.location = "admin.php?page=gp-autoposter&action=edit-feed&feed_id=" + feedID+"&reset_form=1";
 				}
 			});
 
@@ -526,6 +527,7 @@ var GrabPressAutoposter;
 			scheduleDropdown.selectmenu();
 			limitDropdown.selectmenu();
 			authorDropdown.selectmenu();
+			activeFeed.selectmenu();
 
 			// Attach a tool tip to click to play "Learn More" link
 			learnMore.simpletip({
@@ -632,9 +634,9 @@ var GrabPressAutoposter;
 					window.onbeforeunload = null;
 
 					// Confirm cancel editing
-					confirmed = confirm( 'Are you sure you want to cancel editing? You will continue to receive videos based on its settings. All of your changes will be lost.' );
+					confirmed = window.confirm( 'Are you sure you want to cancel editing? You will continue to receive videos based on its settings. All of your changes will be lost.' );
 
-					// If confirmed
+					// If confirmeda 
 					if ( confirmed ) {
 						// Redirect to main Autoposter page
 						window.location = 'admin.php?page=gp-autoposter';

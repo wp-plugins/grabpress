@@ -426,7 +426,42 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 
 				// Get WordPress users
 				$wp_users = get_users();
-
+				
+				//Reset form  and push data in array with feed data
+				if(isset( $params['reset_form']) ||(1 == $params['reset_form'] )){
+				$template_data = array(
+						'form' => array(
+							'referer'         => 'edit',
+							'action'          => 'modify',
+							'feed_id'         => $feed->feed->id,
+							'name'            => $feed->feed->name,
+							'channels'        => '',
+							'keywords_and'    => '',
+							'keywords_not'    => '',
+							'keywords_or'     => '',
+							'keywords_phrase' => '',
+							'limit'           => '',
+							'schedule'        => '',
+							'active'          => $feed->feed->active,
+							'publish'         => '1',
+							'click_to_play'   => '1',
+							'author'          => '',
+							'providers'       => '',
+							'category'        => '',
+							'exclude_tags'    => '',
+							'include_tags'    => '',
+						),
+						'list_providers'  => self::$list_providers,
+						'providers_total' => $providers_total,
+						'list_channels'   => self::$list_channels,
+						'channels_total'  => $channels_total,
+						'blogusers'       => $wp_users,
+					);
+					
+					// Render edit feed template using template data
+					print Grabpress::render( 'includes/gp-feed-template.php', $template_data );
+				}
+				else{
 				// If params 'channels' and 'providers' were provided and are not empty
 				if ( isset( $params['channels'], $params['providers'] ) && ! empty( $params['channels'] ) && ! empty( $params['providers'] ) ) {
 
@@ -509,6 +544,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 				}
 			}
 		}
+	}
 
 		/**
 		 * Loops through each video summary in results and emphasizes keywords
@@ -1259,11 +1295,11 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 					'click_to_play'   => $params['click_to_play'],
 					'category'        => '',
 				),
-				'list_providers'  => $list_providers,
+				'list_providers'  => self::$list_providers,
 				'providers_total' => $providers_total,
-				'list_channels'   => $list_channels,
+				'list_channels'   => self::$list_channels,
 				'channels_total'  => $channels_total,
-				'blogusers'       => $blogusers,
+				'blogusers'       => $wp_users
 			);
 
 			// Render edit feed template using template data

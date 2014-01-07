@@ -3,15 +3,15 @@
  * Plugin URI: http: //www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.4.1-06252013
+ * Version: 2.3.6
  * Author: Grab Media
  * Author URI: http: //www.grab-media.com
- * License: GPL2
+ * License: GPLv2 or later
  */
 
 /**
- * Copyright 2012 Grab Networks Holdings, Inc.
- * (email: licensing@grab-media.com)
+ * Copyright 2014 blinkx, Inc.
+ * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2, as
@@ -1362,13 +1362,14 @@ td * {
 
 #t #b .accordion-heading {
 	height: 33px\9;
+	overflow: hidden;
 	 /*height: auto;*/
 	margin-left: -2px\9;
 	margin-top: -1px\9;
 	margin-right: 0px\9;
 	*margin-right: -1px;
 	*margin-bottom: 0px;
-	filter: progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=270,strength=1);
+	/*filter: progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=270,strength=1);*/
 }
 
 #t #b:last-child .accordion-heading {
@@ -1376,11 +1377,11 @@ td * {
 	margin: auto;
 	filter: none;
 }
-
+/*
 #t #b .accordion-heading:hover {
 	filter: progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=270,strength=1);
 }
-
+*/
 #t #b:last-child .accordion-heading:hover {
 	filter: none;
 }
@@ -1391,7 +1392,7 @@ td * {
 	height: 33px\9;
 	float: right\9;
 	position: relative;
-	top: -32px;
+	top: -33px;
 }
 
 #t #b:last-child .accordion-right {
@@ -1499,7 +1500,7 @@ td * {
 	height: 33px;
 	padding: 0 3px;
 	width: 99px;
-	filter: progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=270,strength=1);
+	/*filter: progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#000,direction=270,strength=1);*/
 }
 
 #t #b #btn-account-settings .accordion-right {
@@ -1534,7 +1535,7 @@ td * {
 	padding-right: 2px\9;
 	width: 101px\9;
 	margin-left: -1px\9;
-	filter: progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=270,strength=1);
+	/*filter: progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=0,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=90,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=180,strength=1), progid:DXImageTransform.Microsoft.Shadow(color=#f00,direction=270,strength=1);*/
 }
 
 #t #b #btn-account-settings .accordion-center:hover a {
@@ -1747,6 +1748,7 @@ td * {
 	text-align: center;
 	text-align: left\9;
 	padding-left: 20px\9 !important;
+	padding-right: 20px\9 !important;
 	font-family: inherit\9;
 	font-size: 18px\9;
 	font: 18px 'Gill Sans W01 Light', Arial;
@@ -1901,3 +1903,11 @@ td * {
 		white-space: nowrap;
 	}
 }
+
+
+/***
+*
+* added class on IE for player
+*/
+
+.accordion-inner-ie{width:100%; display:table;}

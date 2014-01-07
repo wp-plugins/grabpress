@@ -4,14 +4,10 @@
 
 		// Define vars
 		var gpRedirectTime,
-				message = $( '#message' ),
 				wpBodyContent = $( '#wpbody-content' ),
 				gpRedirectURL = 'admin.php?page=gp-autoposter',
 				gpRedirectSeconds = 4
 		;
-
-		// Hide message
-		message.hide();
 
 		function gpRedirect() {
 			// Update page title to show redirect message
@@ -40,7 +36,9 @@
 		// DOM ready
 		$(function() {
 			// Append message to WP body content
+			message = $( '#message' );
 			wpBodyContent.append( message );
+			message.hide();
 
 			// Redirect with countdown
 			gpRedirect();

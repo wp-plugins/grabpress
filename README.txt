@@ -3,7 +3,7 @@ Contributors: grabmedia, blinkxdev
 Tags: video, grab, autoposter, blinkx, blinkx video advantage, grab press, grab media, grab-media, grab networks, video catalog, media, video feed, video player, video content, professional video, ad revenue
 Requires at least: 3.7.1   
 Tested up to: 3.7.1  
-Stable tag: 2.3.5
+Stable tag: 2.3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -176,6 +176,22 @@ We hope to allow users to edit the layout / posting template in future updates o
 6. Quickly view videos and feed status on the Dashboard.
 
 == Changelog ==  
+
+= 2.3.6 =
+*Bug Fixes:*
+ 
+ * GBPS-90 - Update the get_providers() method to include the API_KEY  
+ * GBPS-159 - Message is misplaced when saving a feed  
+ * GBPS-163 - Catalog page: Clicking clear dates button is not clearing the 'To' field value. 
+ * GBPS-164 - Template page: Height value is not changed upon switching between Widescreen 16:9 and standard 4:3 	 
+ * GBPS-165 - Autoposter Page - display for categories differs from 1st save and subsequent (edit feed) saves 	 
+ * GBPS-168 - Edit feed: Clicking cancel editing after doing some changes is not working 	 
+ * GBPS-176 - Dashboard: Contents are not displayed after un-linking the account	 
+ * GBPS-177 - Dashboard: Watchlist > Not able to watch all videos 	 
+ * GBPS-179 - Catalog page: Enter Keyword > Search > Create feed > should populate search criteria to Autoposter create feed form 
+ * GBPS-182 - Update 'grabpress' user password if user uninstalls/reinstalls GrabPress 
+ * GBPS-188 - Template Page: Player minimum width should be 400 px, max width should be 1200 px  
+ * GBPS-192 - IE10 > Dashboard: Watchlist Video title overlaps with player progress bar 
 
 = 2.3.5 =
 *Features:*

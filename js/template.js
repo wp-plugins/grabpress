@@ -3,15 +3,15 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.4.1-06252013
+ * Version: 2.3.6
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPL2
+ * License: GPLv2 or later
  */
 
 /**
- * Copyright 2012 Grab Networks Holdings, Inc.
- * (email: licensing@grab-media.com)
+ * Copyright 2014 blinkx, Inc.
+ * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License, version 2, as
@@ -57,6 +57,8 @@ var GrabPressTemplate;
 					playerWidth = $( '#player_width' ),
 					playerRatio = $( '#ratiowide' ),
 					playerRatiostand = $( '#ratiostand' )
+					
+					
 			;
 
 			// If current message displayed is predetermined API connection error
@@ -66,7 +68,7 @@ var GrabPressTemplate;
 				this.allFormInputs.attr( 'disabled', 'disabled' );
 			}
 
-			// Configure default options for 300px message modal
+			// Configure default options for 400px message modal
 			this.modal300.dialog({
 				autoOpen: false,
 				width: 400,
@@ -79,7 +81,7 @@ var GrabPressTemplate;
 				}
 			});
 
-			// Configure default options for 640px message modal
+			// Configure default options for 1200px message modal
 			this.modal640.dialog({
 				autoOpen: false,
 				width: 400,
@@ -116,7 +118,7 @@ var GrabPressTemplate;
 		 * Sets the width to 640px in the form and template preview
 		 */
 		preserveNativeSize: function() {
-			this.playerWidthInput.value = 640;
+			this.playerWidthInput.value = 1200;
 			this.updateHeightValue();
 		},
 
@@ -172,7 +174,8 @@ var GrabPressTemplate;
 				standardPreview.hide();
 
 				// Calculate layout dimensions
-				height = parseInt( playerWidth / 16, 10 ) * 9;
+				height =  ( playerWidth/16 ) * 9;
+				height =   parseInt( height );
 				widescreenWidth = ( playerWidth * 3 ) / 4;
 				marginLeft = ( playerWidth - widescreenWidth ) / 2;
 
@@ -190,7 +193,8 @@ var GrabPressTemplate;
 				widescreenPreview.hide();
 
 				// Calculate layout dimensions
-				height = parseInt( playerWidth / 4, 10 ) * 3;
+				height = ( playerWidth / 4 ) * 3;
+				height = parseInt( height );
 				standardHeight = ( height * 3 ) / 4;
 				marginTop = ( height - standardHeight ) / 2;
 
@@ -219,7 +223,8 @@ var GrabPressTemplate;
 			var message, dimensionText,
 					form = $( 'form' ),
 					playerWidth = form.find( 'input[name="width"]' ).val(),
-					playerRatio = form.find( 'input[name="ratio"]:checked' ).val()
+					playerRatio = form.find( 'input[name="ratio"]:checked' ).val(),
+					savebutton  =  $('#btn-create-feed')
 			;
 
 			// If player width is NaN
@@ -234,36 +239,37 @@ var GrabPressTemplate;
 				return false;
 			}
 
-			// If player width less than 300px (min)
-			if ( playerWidth < 300 ) {
+			// If player width less than 400px (min)
+			if ( playerWidth < 400  ) {
 				// Set message text
-				message = 'The minimum width for a Grab Video Player is 300px wide.';
-
-				// Set width to min 300px
-				this.playerWidthInput.value = 300;
-
-				// Open modal panel and display message
-				this.modal300.find( 'p' ).html( message );
-				this.modal300.dialog( 'open' );
+				message = 'The minimum width for a Grab Video Player is 400px wide.';
+				alert(message);
+				savebutton.attr( 'disabled', 'disabled' );
+				return false;
+			}
+			else{
+			savebutton.removeAttr( 'disabled' )
 			}
 
 			// If player width greater than 640px (soft-max)
-			if ( playerWidth > 640 ) {
+			if ( playerWidth > 1200 ) {
 				// If widescreen ratio selected
 				if ( 'widescreen' === playerRatio ) {
 					// Set dimension text w/ 360px height
-					dimensionText = '(640px x 360px)';
+					dimensionText = '(1200px x 480px)';
 				} else {
 					// Set dimension text w/ 480px height
-					dimensionText = '(640px x 480px)';
+					dimensionText = '(1200px x 480px)';
 				}
 
 				// Set message text using dynamic dimension text
 				message = 'Creating an embed larger than the video\'s native size ' + dimensionText + ' may result in pixelated video.';
-
-				// Open modal panel and display message
-				this.modal640.find( 'p' ).html( message );
-				this.modal640.dialog( 'open' );
+				alert(message);
+				savebutton.attr( 'disabled', 'disabled' );
+				return false;
+			}
+			else{
+			savebutton.removeAttr( 'disabled' )
 			}
 
 			// Update height in template preview
