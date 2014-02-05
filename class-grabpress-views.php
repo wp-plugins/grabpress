@@ -237,7 +237,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 				// Fetch watchlist and feeds data from API
 				$watchlist = Grabpress_API::get_watchlist();
 				$feeds     = Grabpress_API::get_feeds();
-				$feeds     = Grabpress_API::watchlist_activity($feeds);
+				$feeds     = Grabpress_API::watchlist_activity( $feeds );
 
 				// Get total # of feeds
 				$num_feeds = count( $feeds );
@@ -247,7 +247,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 
 				// Check account is linked by seeing if user email stored
 				// TODO: This doesn't seem like the best way to do this, should look at alternatives
-				$linked = isset($user->email);
+				$linked = isset( $user->email );
 				$publisher_status = $linked ? 'account-linked' : 'account-unlinked';
 
 				// Fetch embed ID
@@ -385,7 +385,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 		static function do_edit_feed( $params ) {
 			try {
 				Grabpress_API::edit_feed( $params );
-				self::feed_creation_success( $params );
+				self::feed_update_success( $params );
 			} catch ( Exception $e ) {
 				Grabpress::log( 'API call exception: ' . $e->getMessage() );
 			}
@@ -426,7 +426,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 
 				// Get WordPress users
 				$wp_users = get_users();
-				
+
 				//Reset form  and push data in array with feed data
 				if(isset( $params['reset_form']) ||(1 == $params['reset_form'] )){
 				$template_data = array(
@@ -457,7 +457,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 						'channels_total'  => $channels_total,
 						'blogusers'       => $wp_users,
 					);
-					
+
 					// Render edit feed template using template data
 					print Grabpress::render( 'includes/gp-feed-template.php', $template_data );
 				}
@@ -610,6 +610,12 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 			// Log caller debug info
 			Grabpress::log();
 
+			// Check if host is localhost by resolving host name to IP
+			$is_localhost = false;
+			if ( '127.0.0.1' == gethostbyname( $_SERVER['HTTP_HOST'] ) ) {
+				$is_localhost = true;
+			}
+
 			// Fetch channels and providers from API
 			self::get_channels_and_providers();
 
@@ -628,6 +634,7 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 				'list_channels'   => self::$list_channels,
 				'channels_total'  => $channels_total,
 				'blogusers'       => $wp_users,
+				'localhost'       => $is_localhost,
 			);
 
 			// Render feed management view
@@ -641,8 +648,9 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 			// Set duplicated name default value to false
 			$duplicated_name = 'false';
 
-			// Get name from request
+			// Get feed name and ID from request
 			$name = $_REQUEST['name'];
+			$id = $_REQUEST['id'];
 
 			// Try fetching feeds from API
 			try{
@@ -654,8 +662,8 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 
 				// Loop through each feed
 				foreach ( $feeds as $record_feed ) {
-					// If feed name is is the same as request feed name
-					if ( $record_feed->feed->name == $name){
+					// If feed name is is the same as request feed name and feed ID is different
+					if ( $record_feed->feed->name == $name && $record_feed->feed->id != $id ) {
 						// Set duplicated name to true
 						$duplicated_name = 'true';
 
@@ -672,6 +680,15 @@ if ( ! class_exists( 'Grabpress_Views' ) ) {
 			echo $duplicated_name;
 
 			die(); // this is required to return a proper result
+		}
+
+				/**
+		 * Renders feed created successfully view
+		 * @param  array $params Associative array containing params data
+		 */
+		static function feed_update_success( $params ) {
+			// Render feed created successfully view
+			print Grabpress::render( 'includes/gp-feed-updated-template.php', array( 'request' => $params ) );
 		}
 
 		/**

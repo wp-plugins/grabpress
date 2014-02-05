@@ -3,7 +3,7 @@
  * Plugin Name: GrabPress
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.6
+ * Version: 2.3.7
  * Author: Grab Media, a blinkx company
  * Author URI: http://www.grab-media.com
  * License: GPL2
@@ -47,7 +47,7 @@ if ( ! class_exists( 'Grabpress' ) ) {
 		static $message        = false;
 		static $error          = false;
 		static $grabpress_user = GP_USER;
-		static $feed_message   = 'items marked with an asterisk * are required.';
+		static $feed_message   = 'Items marked with an asterisk * are required.';
 		static $connector;
 		static $connector_user;
 		static $providers;
@@ -126,7 +126,7 @@ if ( ! class_exists( 'Grabpress' ) ) {
 		static function check_permissions_for( $page = 'default' ) {
 			// Return permissions for user based on current page
 			switch ( $page ) {
-				case 'gp-autopost':
+				case 'gp-autoposter':
 					return current_user_can( 'edit_others_posts' ) && current_user_can( 'publish_posts' );
 					break;
 				case 'gp-account':
@@ -233,7 +233,7 @@ if ( ! class_exists( 'Grabpress' ) ) {
 			$params = self::strip_deep( $_REQUEST );
 
 			// If GrabPress does not have permissions to take current action on current page
-			if ( ! Grabpress::check_permissions_for( $page, $action ) ) {
+			if ( ! Grabpress::check_permissions_for( $page ) ) {
 				// Log custom fatal error
 				Grabpress::abort( 'Insufficient permissions' );
 			}
@@ -758,7 +758,7 @@ if ( ! class_exists( 'Grabpress' ) ) {
 			}
 
 			// If has permission to edit Autoposter
-			if ( Grabpress::check_permissions_for( 'gp-autopost' ) ) {
+			if ( Grabpress::check_permissions_for( 'gp-autoposter' ) ) {
 				// Add AutoPoster submen
 				add_submenu_page( 'grabpress', 'AutoPoster', 'AutoPoster', 'publish_posts', 'gp-autoposter', array( 'GrabPress', 'dispatcher' ) );
 			}
@@ -767,10 +767,16 @@ if ( ! class_exists( 'Grabpress' ) ) {
 			add_submenu_page( 'grabpress', 'Catalog', 'Catalog', 'publish_posts', 'gp-catalog', array( 'GrabPress', 'dispatcher' ) );
 
 			// If has permission to edit GP player template
-			if ( Grabpress::check_permissions_for( 'gp-template' ) ) {
-				// Add Template submenu
-				add_submenu_page( 'grabpress', 'Template', 'Template', 'publish_posts', 'gp-template', array( 'GrabPress', 'dispatcher' ) );
-			}
+			try {
+				$connector_id = Grabpress_API::get_connector_id();
+				if ( Grabpress::check_permissions_for( 'gp-template' ) && is_numeric( $connector_id ) ) {
+					// Add Template submenu
+					add_submenu_page( 'grabpress', 'Template', 'Template', 'publish_posts', 'gp-template', array( 'GrabPress', 'dispatcher' ) );
+				}
+			} catch ( Exception $e ) { // If deletion is unsuccessful
+				// Log exception error message
+				Grabpress::log('API call exception: ' . $e->getMessage() );
+		 	}
 
 			// Reference global $submenu
 			global $submenu;
@@ -886,7 +892,7 @@ if ( ! class_exists( 'Grabpress' ) ) {
 			$adv_search = trim( $adv_search );
 
 			// Sort regex matches for text in between /" and "/ into an array
-			preg_match_all( '/(?<=\/\")([^\"]*)(?=\"\/)/', $adv_search, $matched_exact_phrase, PREG_PATTERN_ORDER );
+			preg_match_all( '/(?<=\")([^\"]*)(?=\")/', $adv_search, $matched_exact_phrase, PREG_PATTERN_ORDER );
 
 			// Remove text wrapped in quotes, i.e. "this will be removed" and strip slashes
 			$sentence = preg_replace( '/\"([^\"]*)\"/', '', stripslashes( $adv_search ) );
@@ -935,10 +941,10 @@ if ( ! class_exists( 'Grabpress' ) ) {
 
 			// Return associative array of keywords sorted by type
 			return array(
-				"keywords_phrase" => $keywords_phrase,
-				"keywords_and"    => $keywords_and,
-				"keywords_not"    => $keywords_not,
-				"keywords_or"     => $keywords_or,
+				'keywords_phrase' => $keywords_phrase,
+				'keywords_and'    => $keywords_and,
+				'keywords_not'    => $keywords_not,
+				'keywords_or'     => $keywords_or,
 			);
 		}
 
@@ -975,7 +981,7 @@ if ( ! class_exists( 'Grabpress' ) ) {
 					}
 
 					// If permission to autopost
-					if ( Grabpress::check_permissions_for( 'gp-autopost' ) ) {
+					if ( Grabpress::check_permissions_for( 'gp-autoposter' ) ) {
 						// Output message to admin dashboard
 						Grabpress::$message = 'Thank you for activating GrabPress. Try creating your first Autoposter feed ' . $here . '.';
 					}

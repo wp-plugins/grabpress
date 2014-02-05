@@ -3,7 +3,7 @@
  * Plugin URI: http: //www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.6
+ * Version: 2.3.7
  * Author: Grab Media
  * Author URI: http: //www.grab-media.com
  * License: GPLv2 or later
@@ -1161,17 +1161,26 @@ td * {
 }
 
 .grabgear {
-	bottom: 50%;
-	*bottom: -70px;
+    position:fixed;
+    top: 0;
+    left: 0;
+    display: table-cell;
+    height: 100%;
+    width: 100%;
+    z-index: 16777271;/* lowest maximum z-index supported cross-browser
+			 (safari 3 was 24bit) */
+}
+.dashgear.grabgear {
+    background: rgba(255,255,255,0.75);
+   }
+.grabgear>img{
+	top: 50%;
 	left: 50%;
 	width: 68px;
 	height: 68px;
 	margin-top: -34px;
 	margin-left: -34px;
 	position: absolute;
-	z-index: 16777271; /* lowest maximum z-index supported cross-browser
-	(safari 3 was 24bit) */
-	top: 50%;
 }
 
 /* Dashboard ------------*/
@@ -1256,6 +1265,8 @@ td * {
 
 #t #b .accordion-inner {
 	padding: 0;
+	display: table;
+	width: 100%;
 }
 
 #t #b .feeds {
@@ -1544,30 +1555,35 @@ td * {
 
 #t #b .watch {
 	width: 70px;
+	padding: 0;
 }
-
+#t #b .watch input:focus{
+    box-shadow: none;
+}
 #t #b .watch-on {
 	background: url("../images/watch-on.png") no-repeat scroll 0 0;
 	border: none;
 	display: block;
-	height: 14px !important;
-	width: 15px !important;
-	margin-right: 30px;
-	margin-top: 4px;
-	padding-top: 3px;
+	height: 26px !important;
+	width: 26px !important;
+	margin-right: 25px;
+	margin-top: 0;
+	padding-top: 0;
 	text-indent: -3000px;
+	box-shadow: none;
 }
 
 #t #b .watch-off {
 	background: url("../images/watch-off.png") no-repeat scroll 0 0;
 	border: none;
 	display: block;
-	height: 14px !important;
-	width: 15px !important;
-	margin-right: 30px;
-	margin-top: 4px;
-	padding-top: 3px;
+	height: 26px !important;
+	width: 26px !important;
+	margin-right: 25px;
+	margin-top: 0;
+	padding-top: 0;
 	text-indent: -3000px;
+	box-shadow: none;
 }
 
 #t #b .feed-health-0 {
@@ -1735,10 +1751,10 @@ td * {
 	width: 100% !important;
 	padding-right: 752px !important;
 	max-width: 1392px;
-	min-width: 1072px;
+	/*min-width: 1072px;*/
 	width: auto\9 !important;
-	min-width: 360px\9;
-	max-width: 640px\9;
+	/*min-width: 360px\9;*/
+	/*max-width: 640px\9;*/
 }
 
 #t #b .accordion-inner .accordion-warning {
@@ -1891,6 +1907,28 @@ td * {
 	border-bottom: 1px solid #818181;
 }
 
+.bold {
+	font-weight: bold;
+}
+
+.form-overlay {
+	height: 100%;
+	width: 100%;
+	background: rgba( 255, 255, 255, 0.75 );
+	position: absolute;
+	top: 0;
+	left: -20px;
+	/*z-index: 998;*/
+}
+
+.form-overlay-message {
+	position: fixed;
+	width: 50%;
+	left: 25%;
+	top: 40%;
+	z-index: 1000;
+}
+
 
 /**
  * 4.0 WebKit Specific Hacks
@@ -1903,11 +1941,3 @@ td * {
 		white-space: nowrap;
 	}
 }
-
-
-/***
-*
-* added class on IE for player
-*/
-
-.accordion-inner-ie{width:100%; display:table;}

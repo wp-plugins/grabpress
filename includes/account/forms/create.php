@@ -236,21 +236,22 @@
 
 			// On cancel button click
 			cancelBtn.on( 'click', function() {
-				// Define vars
-				var confirm = window.confirm( 'Are you sure you want to cancel creation?\n\nAds played due to this plug-in will continue to not earn you any money, and your changes to this form will be lost.' ),
-						register = $( '#register' ),
-						firstRegister = register[0],
-						action = $( '#id_action' )
-				;
-
 				// If form changed
 				if ( formChanged ) {
+					// Define vars
+					var confirm = window.confirm( 'Are you sure you want to cancel creation?\n\nAds played due to this plug-in will continue to not earn you any money, and your changes to this form will be lost.' ),
+							register = $( '#register' ),
+							firstRegister = register[0],
+							action = $( '#id_action' )
+					;
 					// If confirm
 					if ( confirm ) {
 						// Reset form
 						firstRegister.reset();
 						action.val( 'default' );
 						register.submit();
+					} else {
+						// Do nothing
 					}
 				} else { // Form unchanged
 					// Redirect to account page
@@ -265,6 +266,8 @@
 			;
 			allDropdowns.on( 'change', doValidation );
 			clearForm.on( 'click', function() {
+				var register = $( '#register' ),
+					firstRegister = register[0];
 				firstRegister.reset();
 				doValidation();
 			});

@@ -3,7 +3,7 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.6
+ * Version: 2.3.7
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
  * License: GPLv2 or later
@@ -49,7 +49,7 @@ var GrabPressCatalog;
 		 * @type {Object}
 		 */
 		multiSelectOptions: {
-			noneSelectedText: 'Select providers',
+			noneSelectedText: 'Select at least one Provider',
 			selectedText: function( selectedCount, totalCount ) {
 				// If all providers selected
 				if ( totalCount === selectedCount ) {
@@ -67,7 +67,7 @@ var GrabPressCatalog;
 		 * @type {Object}
 		 */
 		multiSelectOptionsChannels: {
-			noneSelectedText: 'Select Video Categories',
+			noneSelectedText: 'Select at least one Video Category',
 			selectedText: function( selectedCount, totalCount ) {
 				// If all video categories selected
 				if ( totalCount === selectedCount ) {
@@ -324,15 +324,40 @@ var GrabPressCatalog;
 				}
 			}).multiselectfilter();
 
-			// Configure datepicker
-			datepicker.datepicker({
+			// Configure "From" datepicker
+			createdAfter.datepicker({
 				showOn: 'both',
 				buttonImage: host + '/wp-content/plugins/grabpress/images/icon-calendar.gif',
 				buttonImageOnly: true,
 				changeMonth: true,
 				changeYear: true,
 				showAnim: 'slideDown',
-				duration: 'fast'
+				duration: 'fast',
+				maxDate: 0,
+				numberOfMonths: 3,
+				onClose: function( selectedDate ) {
+					if ( selectedDate ) {
+						createdBefore.datepicker( 'option', 'minDate', selectedDate );
+					}
+				}
+			});
+
+			// Configure "To" datepicker
+			createdBefore.datepicker({
+				showOn: 'both',
+				buttonImage: host + '/wp-content/plugins/grabpress/images/icon-calendar.gif',
+				buttonImageOnly: true,
+				changeMonth: true,
+				changeYear: true,
+				showAnim: 'slideDown',
+				duration: 'fast',
+				maxDate: 0,
+				numberOfMonths: 3,
+				onClose: function( selectedDate ) {
+					if ( selectedDate ) {
+						createdAfter.datepicker( 'option', 'maxDate', selectedDate );
+					}
+				}
 			});
 
 			// On clear dates click

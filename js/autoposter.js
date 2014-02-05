@@ -3,7 +3,7 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.6
+ * Version: 2.3.7
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
  * License: GPLv2 or later
@@ -355,7 +355,7 @@ var GrabPressAutoposter;
 					providersDropdownUpdate = $( '#provider-select-update' ),
 					updateBtn = $( '.btn-update' ),
 					scheduleDropdown = $( '.schedule-select' ),
-					activeFeed = $( '.active-feed' ),	
+					activeFeed = $( '.active-feed' ),
 					limitDropdown = $( '.limit-select' ),
 					authorDropdown = $( '.author-select' ),
 					learnMore = $( '#learn-more' ),
@@ -527,8 +527,7 @@ var GrabPressAutoposter;
 			scheduleDropdown.selectmenu();
 			limitDropdown.selectmenu();
 			authorDropdown.selectmenu();
-			activeFeed.selectmenu();
-
+			
 			// Attach a tool tip to click to play "Learn More" link
 			learnMore.simpletip({
 				content: 'Please be aware that selecting a click-to-play player can negatively impact your revenue, <br />as not all users will generate an ad impression. If you are looking to optimize revenue <br />through Grabpress, all feeds should be set to autoplay.',
@@ -636,7 +635,7 @@ var GrabPressAutoposter;
 					// Confirm cancel editing
 					confirmed = window.confirm( 'Are you sure you want to cancel editing? You will continue to receive videos based on its settings. All of your changes will be lost.' );
 
-					// If confirmeda 
+					// If confirmed
 					if ( confirmed ) {
 						// Redirect to main Autoposter page
 						window.location = 'admin.php?page=gp-autoposter';
@@ -865,7 +864,8 @@ var GrabPressAutoposter;
 			// Build data array
 			data = {
 				action: 'gp_feed_name_unique',
-				name: feedName
+				name: feedName,
+				id: $( '.editing-feed' ).attr( 'data-feed-id' )
 			};
 
 			// If update is required
@@ -958,7 +958,7 @@ var GrabPressAutoposter;
 				// If feed found with keyword
 				if ( feed ) {
 					// Append phrase to keywords string
-					textKeywords += '<strong>"' + value + '"</strong>(exact phrase), ';
+					textKeywords += '<strong>"' + value + '"</strong> (exact phrase), ';
 
 					// Increment keys
 					keys++;
@@ -984,7 +984,7 @@ var GrabPressAutoposter;
 
 				// Finish text message
 				text += 'already used by previously created feeds.<br />The videos ';
-				text += 'matching a keyword will show only in the first created feed.';
+				text += 'matching a keyword will show only in the feed that was created first.';
 
 				// Setup and open keywords modal panel
 				modalKeywords.find( 'p' ).html( text );

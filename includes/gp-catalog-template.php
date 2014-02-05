@@ -59,7 +59,7 @@
 	<input type="hidden" id="keywords_phrase" name="keywords_phrase" value="<?php echo esc_attr( $keywords_phrase = isset( $keywords_phrase ) ? $keywords_phrase : '' ); ?>" />
 	<input type="hidden" name="post_title" value=""  id="post_title" />
 	<div class="wrap" >
-		<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg" alt="Grab logo" />
+<img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'images/logo-dark.png' ); ?>" alt="Logo" />
 		<h2>GrabPress: Find a Video in our Catalog</h2>
 		<p>Grab video content delivered fresh to your blog <a href="#" onclick='return false;' id="how-it-works">how it works</a></p>
 		<fieldset id="preview-feed">
@@ -71,7 +71,7 @@
 			<div class="label-tile">
 				<div class="tile-left">
 					<input type="hidden" name="channels_total" value="<?php echo $channels_total; ?>" id="channels_total" />
-					<span class="preview-text-catalog"><b>Grab Video Categories: </b>
+					<span class="preview-text-catalog"><b>Grab Video Categories*: </b>
 					</span>
 				</div>
 				<div class="tile-right">
@@ -95,7 +95,7 @@
 			<div class="label-tile">
 				<div class="tile-left">
 					<input type="hidden" name="providers_total" value="<?php echo $providers_total; ?>" class="providers_total" id="providers_total" />
-					<span class="preview-text-catalog"><b>Providers: </b></span>
+					<span class="preview-text-catalog"><b>Providers*: </b></span>
 				</div>
 				<div class="tile-right">
 					<select name="providers[]" id="provider-select" class="multiselect" multiple="multiple" style="<?php esc_attr( Grabpress::outline_invalid() ); ?>" onchange="GrabPressCatalog.doValidation()" >
@@ -106,7 +106,7 @@
 								$provider = $record_provider->provider;
 								$provider_name = $provider->name;
 								$provider_id = $provider->id;
-								$provider_selected = ( in_array( $provider_id, $providers ) ) ? 'selected="selected"' : "";
+								$provider_selected = ( is_array( $providers ) && in_array( $provider_id, $providers ) ) ? 'selected="selected"' : "";
 
 								// Output option HTML
 								echo '<option value = "' . $provider_id . '" ' . $provider_selected . '>' . $provider_name . '</option>';
@@ -135,6 +135,7 @@
 				</div>
 			</div>
 			<div class="clear"></div>
+			<span class="description" style="<?php esc_attr( Grabpress::outline_invalid() ); ?>color:red"> <?php echo esc_html( Grabpress::$feed_message ); ?></span>
 			<?php if ( isset( $form['keywords'] ) ) { ?>
 				<div class="label-tile-one-column">
 					Sort by:
@@ -144,7 +145,7 @@
 					?>
 					<input type="radio" class="sort_by" name="sort_by" value="created_at" <?php echo $created_checked;?> /> Date
 					<input type="radio" class="sort_by" name="sort_by" value="relevance" <?php echo $relevance_checked;?> /> Relevance
-					<?php if ( ! empty( $list_feeds['results'] ) && Grabpress::check_permissions_for('gp-autopost') ) { ?>
+					<?php if ( ! empty( $list_feeds['results'] ) && Grabpress::check_permissions_for('gp-autoposter') ) { ?>
 						<input type="button" id="btn-create-feed" class="button-primary" value="<?php esc_attr( _e( 'Create Feed' ) ); ?>" />
 					<?php } ?>
 				</div>

@@ -59,15 +59,17 @@
 						$display_keywords = false;
 					}
 				?>
-					<tr id="tr-<?php echo esc_attr( $feedId ); ?>" class="<?php echo esc_attr( $row_class ); ?>">
+					<tr id="tr-<?php echo esc_attr( $feedId ); ?>" data-feed-id="<?php esc_attr( $feedId ); ?>" class="<?php echo esc_attr( $row_class ); ?>">
 						<td>
 							<?php
-								if ( 'modify' == isset( $form['action'] ) ) {
-									echo $checked = ( $feed->active  ) ? 'Yes' : 'No';
-								} else {
-									$checked = ( $feed->active  ) ? 'checked = "checked"' : '';
-									echo '<input ' . $checked . ' type="checkbox" value="1" name="active" class="active-check" id="active-check-' . $feedId . '" />';
+								if ( 'default' == $form['action'] && isset( $form['action'] )) {
+								$checked = ( $feed->active  ) ? 'checked = "checked"' : '';
+								echo '<input ' . $checked . ' type="checkbox" value="1" name="active" class="active-check" id="active-check-' . $feedId . '" />';
 								}
+								else if ( 'modify' == isset( $form['action'] ) ) {
+									echo $checked = ( $feed->active  ) ? 'Yes' : 'No';
+								} 
+						
 							?>
 						</td>
 						<td>

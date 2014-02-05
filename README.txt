@@ -3,7 +3,7 @@ Contributors: grabmedia, blinkxdev
 Tags: video, grab, autoposter, blinkx, blinkx video advantage, grab press, grab media, grab-media, grab networks, video catalog, media, video feed, video player, video content, professional video, ad revenue
 Requires at least: 3.7.1   
 Tested up to: 3.7.1  
-Stable tag: 2.3.6
+Stable tag: 2.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -176,6 +176,39 @@ We hope to allow users to edit the layout / posting template in future updates o
 6. Quickly view videos and feed status on the Dashboard.
 
 == Changelog ==  
+
+= 2.3.7 =
+*Features:*
+	
+ * GBPS-172 - Edit feed: There should be a option to deactivate the feed
+ * GBPS-7 - All forms need to have proper validation across the plugin
+ * GBPS-215 - Dashboard UI improvement - Feed Activity - turning on/off feeds in Watchlist	
+
+*Bug Fixes:*
+
+ * GBPS-206 - Fortune Cookie messages are displaying inline HTML code
+ * GBPS-203 - Edit feed: User is not able to use the existing keyword (used for some other feed) and update the feed
+ * GBPS-195 - Accounts > Create and link to new account > Clear form is not working
+ * GBPS-194 - Dashboard: Feed details page: Improvements, time format and typo errors
+ * GBPS-192 - IE10 > Dashboard: Watchlist Video title overlaps with player progress bar
+ * GBPS-188 - Template Page: Player minimum width should be 400 px, max width should be 1200 px
+ * GBPS-186 - Edit feeds: When we update an existing feed, we get the message 'Feed created successfullyÉ'	
+ * GBPS-185 - Post author drop down value is empty if we try to create a feed from catalog page
+ * GBPS-182 - Update 'grabpress' user password if user uninstalls/reinstalls GrabPress
+ * GBPS-179 - Catalog page: Enter Keyword > Search > Create feed > should populate search criteria to Autoposter create feed form
+ * GBPS-177 - Dashboard: Watchlist > Not able to watch all videos
+ * GBPS-176 - Dashboard: Contents are not displayed after un-linking the account
+ * GBPS-168 - Edit feed: Clicking cancel editing after doing some changes is not working
+ * GBPS-166 - IE 9/IE 10:  Clicking preview from create feeds page causes JS errors	
+ * GBPS-165 - Autoposter Page - display for categories differs from 1st save and subsequent (edit feed) saves
+ * GBPS-164 - Template page: Height value is not changed upon switching between widescreen 16:9 and standard 4:3
+ * GBPS-161 - All the pages: Information message display issues
+ * GBPS-160 - Manage feeds > Post category value is incorrectly displayed
+ * GBPS-146 - IE9 > Dashboard > Watch list panel is truncated on page load
+ * GBPS-127 - PHP errors generated when GrabPress is calling its own functions
+ * GBPS-90 - Update the get_providers() method to include the API_KEY
+ * GBPS-73 - IE 8: Having a feed in the Dashboard Watchlist renders an error
+ * GBPS-30 - Dashboard > Watchlist: Only the first video selected plays 
 
 = 2.3.6 =
 *Bug Fixes:*

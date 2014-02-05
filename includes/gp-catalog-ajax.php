@@ -145,7 +145,7 @@
 						<input type="radio" class="sort_by" name="sort_by" value="relevance" <?php echo $relevance_checked; ?> /> Relevance
 							<?php
 								if ( isset( $form['display'] ) && 'Tab' == $form['display'] ) {
-									if( ! empty( $list_feeds['results'] ) && Grabpress::check_permissions_for( 'gp-autopost' ) ) {
+									if( ! empty( $list_feeds['results'] ) && Grabpress::check_permissions_for( 'gp-autoposter' ) ) {
 							?>
 								<input type="button" id="btn-create-feed" class="button-primary" value="<?php esc_attr( _e( 'Create Feed' ) ); ?>" />
 								<?php } ?>

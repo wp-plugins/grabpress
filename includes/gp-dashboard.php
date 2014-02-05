@@ -7,6 +7,7 @@
 		}
 	</style>
 <![endif]-->
+<?php date_default_timezone_set( 'America/New_York' ); ?>
 <form method="post" id="form-dashboard">
 	<input type="hidden" name="environment" value="<?php echo esc_attr( Grabpress::$environment ); ?>" id ="environment" />
 	<input type="hidden" name="embed_id" value="<?php echo esc_attr( $embed_id ); ?>" id ="embed_id" />
@@ -16,7 +17,7 @@
 				<div class="container-fluid">
 					<div class="row-fluid watchlist-wrap">
 						<div class="span4 watchlist">
-							<img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'images/logo.png' ); ?>" alt="Logo" />
+							<img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'images/logo-light.png' ); ?>" alt="Logo" />
 							<div class="tabbable panel">
 								<ul class="nav nav-tabs">
 									<li class="active">
@@ -49,7 +50,7 @@
 													<div class="accordion-right"></div>
 												</div>
 												<div id="collapse<?php echo $i;?>" class="accordion-body collapse in" style="<?php echo esc_attr( 1 == $i ? '': 'display:none;' ); ?>">
-													<div class="accordion-inner accordion-inner-ie"></div>
+													<div class="accordion-inner"></div>
 												</div>
 											</div>
 										<?php $i++; } } ?>
@@ -108,7 +109,7 @@
 																$create = isset( $_REQUEST['page'], $_REQUEST['action'] ) && 'account' == $_REQUEST['page'] && 'create' == $_REQUEST['action'] ? 'Create' : '<a href="admin.php?page=gp-account&action=create">Create</a>';
 																$link =  isset( $_REQUEST['page'], $_REQUEST[ 'action']) && 'account' == $_REQUEST['page'] && 'default' == $_REQUEST['action'] ? 'link an existing' : '<a href="admin.php?page=gp-account&action=default">link an existing</a>';
 															echo 'Want to earn money?' . $create . ' or ' . $link . ' Grab Publisher account.';
-														} else if ( 0 == $num_feeds && Grabpress::check_permissions_for( 'gp-autopost' ) ) {
+														} else if ( 0 == $num_feeds && Grabpress::check_permissions_for( 'gp-autoposter' ) ) {
 																$admin = get_admin_url();
 																$admin_page = $admin . 'admin.php?page=gp-autoposter';
 																$here = '<a href="' . $admin_page . '">here</a>';
@@ -117,7 +118,7 @@
 															$p = count( $pills );
 															$p--;
 															$r = rand( 0, $p );
-															echo esc_html( $pills[ $r ]->message->body );
+															echo html_entity_decode( $pills[ $r ]->message->body );
 														} ?>
 													</div>
 												</div>
@@ -144,7 +145,7 @@
 								<div class="panel nano">
 									<div class="content">
 									<h3>Feed Activity (Latest Auto-post)</h3>
-									<a href="#" id="help">help</a>
+									<a href="#" id="help">Help</a>
 									<table class="table table-hover">
 										<thead>
 											<tr>
@@ -208,7 +209,7 @@
 														}
 													?>
 												</td>
-												<td><a href="#" class="big-link" data-reveal-id="FeedDetails_Modal_<?php echo esc_attr( $feedId ); ?>" data-animation="fade">details</a>
+												<td><a href="#" class="big-link" data-reveal-id="FeedDetails_Modal_<?php echo esc_attr( $feedId ); ?>" data-animation="fade">Details</a>
 												<i class="icon-pencil"></i></td>
 											</tr>
 										<?php } ?>
@@ -248,9 +249,9 @@
 	<div id="FeedDetails_Modal_<?php echo esc_attr( $feedId ); ?>" class="reveal-modal">
 		<p>Feed Details</p>
 		<div class="infoBox">
-			<h2 style="text-align:center;"><?php echo esc_url( $feed->name ); ?></h2>
-			<p style="text-align:center;">Created at: <?php echo esc_html( $feed->created_at ); ?></p>
-			<p>Search Criteria</p>
+			<h2 style="text-align:center;"><?php echo urldecode( $feed->name ); ?></h2>
+			<p style="text-align:center;">Created at: <?php echo date( 'n/j/Y g:iA T', strtotime( $feed->created_at ) ); ?></p>
+			<p class="bold">Search Criteria:</p>
 			<?php
 				$url = array();
 				parse_str( parse_url( $feed->url, PHP_URL_QUERY ), $url );
@@ -299,32 +300,44 @@
 					$providers = explode( ',' , $url['amp;providers'] ); // providers chosen by the user
 					$providers_selected = count($providers);
 					if ( $url['amp;providers'] == '' ) {
-						echo 'All providers';
+						echo 'All Content Providers';
 					} else {
+						$num_providers = count( $list_providers );
+						$num_providers_selected = 0;
+						$content_providers = '';
 						foreach ( $list_providers as $record_provider ) {
 							$provider = $record_provider->provider;
 							$provider_name = $provider->name;
 							$provider_id = $provider->id;
 							if( in_array( $provider_id, $providers ) ) {
-								echo $provider_name . ', ';
+								$num_providers_selected++;
+								$content_providers .= $provider_name . ', ';
 							}
 						}
+						echo '<a href="#" title="' . $content_providers . '">' . $num_providers_selected . ' of ' . $num_providers . ' Providers Selected</a>';
 					}
 				?>
 				<br />
 			</p>
-			<p>Publish Settings</p>
+			<p class="bold">Publish Settings:</p>
 			<p>
-				Schedule: <?php echo isset( $feed->update_frequency ) ? $times[ $feed->update_frequency ] : ''; ?> (last update: <?php echo $feed->updated_at; ?>)<br />
-				Maximun Posts per update: <?php echo $feed->posts_per_update; ?><br />
+				Schedule: <?php echo isset( $feed->update_frequency ) ? $times[ $feed->update_frequency ] : ''; ?> (last update: <?php echo date( 'n/j/Y g:iA T', strtotime( $feed->updated_at ) ); ?>)<br />
+				Maximum Posts per update: <?php echo $feed->posts_per_update; ?><br />
 				Post Categories:
 				<?php
 					$category_list_length = count( $feed->custom_options->category );
 					if( 0 == $category_list_length ) {
 						echo 'Uncategorized';
 					} else {
+						// Create iteration tracker
+						$i = 0;
 						foreach ( $feed->custom_options->category as $categ ) {
-							echo $categ . ', ';
+							$i++;
+							if( $i == $category_list_length ) {
+								echo $categ;
+							} else {
+								echo $categ . ', ';
+							}
 						}
 					}
 				?>
@@ -343,11 +356,11 @@
 				</div>
 				<div class="accordion-right">&nbsp;</div>
 		</div>
-		<?php if ( Grabpress::check_permissions_for( 'gp-autopost' ) ) { ?>
+		<?php if ( Grabpress::check_permissions_for( 'gp-autoposter' ) ) { ?>
 			<div class="btn-modal-box">
 					<div class="accordion-left">&nbsp;</div>
 					<div class="accordion-center">
-						<a href="admin.php?page=gp-autoposter&action=edit-feed&feed_id=<?php echo esc_attr( $feedId ); ?>" id="btn-update-<?php echo esc_attr( $feedId ); ?>" class="btn-update-feed">edit</a>
+						<a href="admin.php?page=gp-autoposter&action=edit-feed&feed_id=<?php echo esc_attr( $feedId ); ?>" id="btn-update-<?php echo esc_attr( $feedId ); ?>" class="btn-update-feed">Edit</a>
 					</div>
 					<div class="accordion-right">&nbsp;</div>
 			</div>
@@ -357,7 +370,7 @@
 <div id="AccoutDetails_Modal" class="reveal-modal">
 	<p>Account Details</p>
 	<div class="infoBox">
-		<p>Linked Account Email Adrress: <br />
+		<p>Linked Account Email Address: <br />
 		<?php
 			try {
 				$user = Grabpress_API::get_user();
@@ -392,6 +405,9 @@
 			<div class="accordion-center"><a class="close-reveal-modal" href="#">Back to Dashboard</a></div>
 			<div class="accordion-right">&nbsp;</div>
 	</div>
+</div>
+<div class="dashgear grabgear">
+     <?php echo '<img src="' . plugin_dir_url( __FILE__ ) . 'images/grabgear.gif" alt="Grab">'; ?>
 </div>
 <script type="text/javascript">
 	// Create jQuery $ scope

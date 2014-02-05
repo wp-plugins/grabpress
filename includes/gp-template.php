@@ -1,6 +1,6 @@
 <?php $checked = 'checked="checked"'; ?>
 <div class="wrap">
-	<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg" alt="Grab logo" />
+<img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'images/logo-dark.png' ); ?>" alt="Logo" />
 	<h2>GrabPress: Edit the player template for video posts</h2>
 	<p>Video that fits your site design</p>
 	<form action="" method="POST" class="template-form">

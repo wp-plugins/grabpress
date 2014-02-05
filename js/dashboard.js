@@ -3,7 +3,7 @@
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure Grab's AutoPoster software to deliver fresh video
  * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.6
+ * Version: 2.3.7
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
  * License: GPLv2 or later
@@ -276,6 +276,7 @@ var GrabPressDashboard;
 		 */
 		init: function() {
 			// Define vars
+		    $('.grabgear').css({display:'none'});
 			var $window = $( window ),
 					windowWidth = $window.width(),
 					rightPane = $( '#t #b .watchlist-wrap .right-pane' ),
@@ -416,7 +417,7 @@ var GrabPressDashboard;
 			}
 
 			// Build embed HTML
-			embed  = '<div id="gcontainer' + embedID + '" style="height: 100%;">\n';
+			embed  = '<div id="gcontainer' + embedID + '" style="display: table-cell; height: 100%;">\n';
 			embed += '	<div id="grabDiv' +embedID + '"></div>\n';
 			embed += '</div>';
 
@@ -512,7 +513,7 @@ var GrabPressDashboard;
 					// Hide watchlist
 					left.hide();
 
-					// If active video not undefined
+					// If active video is defined
 					if( self.activeVideo ) {
 						// Pause video
 						self.activeVideo.pauseVideo();
@@ -532,10 +533,10 @@ var GrabPressDashboard;
 					// Show watchlist
 					left.show();
 
-					// If active video is not undefined
+					// If active video is defined
 					if ( self.activeVideo ) {
-						// Play video
-						self.activeVideo.playVideo();
+						//XXX: do NOT Play video why would we? -rs
+						//self.activeVideo.playVideo();
 					}
 
 					// After 150ms
@@ -552,8 +553,8 @@ var GrabPressDashboard;
 
 					// If active video not undefined
 					if ( self.activeVideo ) {
-						// Play video
-						self.activeVideo.playVideo();
+						//XXX: do NOT Play video, why would we the user hasnt asked for playback -rs
+						//self.activeVideo.playVideo();
 					}
 
 					// After 150ms
@@ -578,6 +579,7 @@ var GrabPressDashboard;
 
 			// On watchlist check click
 			watchlistCheck.on( 'click', function() {
+			    $('.grabgear').css({display:'table-cell'});
 				// Define vars
 				var watchlist, data,
 						id = this.id.replace( 'watchlist-check-', '' ),
@@ -602,6 +604,7 @@ var GrabPressDashboard;
 
 				// Get accordion content via AJAX
 				$.post( ajaxurl, data, function( response ) {
+				    $('.grabgear').css({display: 'none'});
 					// Define vars
 					var parsedJSON = $.parseJSON( response ),
 							accordion = '',
@@ -731,8 +734,11 @@ var GrabPressDashboard;
 
 	// DOM ready
 	$(function() {
-		// Initialize GrabPressDashboard class
+		// Initialize GrabPressDahsboard class
 		GrabPressDashboard.init();
+
+		// Adjust dashboard height after DOM loads
+		$( '#form-dashboard' ).height( $( document ).height() );
 	});
 
 })(jQuery); // End $ scope

@@ -96,7 +96,7 @@
 					// If email linked
 					if( $linked ) {
 				?>
-					'Money earned with this installation will continue to be credited to the account associated with the email address <?php echo $user->email; ?>.';
+					'Money earned with this installation will continue to be credited to the account associated with the email address <?php echo $user->email; ?>.'
 				<?php } else { ?>
 					'Ads played due to this plug-in installation will not earn you any money.'
 				<?php } ?>);

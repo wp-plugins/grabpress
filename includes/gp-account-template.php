@@ -1,5 +1,5 @@
 <div class="wrap">
-	<img src="http://grab-media.com/corpsite-static/images/grab_logo.jpg" alt="GrabMedia logo" />
+<img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'images/logo-dark.png' ); ?>" alt="Logo" />
 	<h2>GrabPress: Earn money with a Grab Publisher Account</h2>
 	<?php
 		// Try fetching user from API
