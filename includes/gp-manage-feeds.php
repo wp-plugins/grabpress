@@ -1,6 +1,6 @@
 <?php
 	try {
-		$feeds = Grabpress_API::get_feeds();
+		$feeds = Grabpress_API::get_video_feeds();
 	} catch ( Exception $e ) {
 		$feeds = array();
 		Grabpress::log( 'API call exception: ' . $e->getMessage() );
@@ -32,6 +32,7 @@
 				<th></th>
 			</tr>
 			<?php
+			if ( is_object($feeds) ) {
 				for ( $n = 0; $n < $num_feeds; $n++ ) {
 					$feed = $feeds[$n]->feed;
 					$keywords[ html_entity_decode( $feed->name ) ] = $phrase[ html_entity_decode( $feed->name ) ] = '';
@@ -270,26 +271,32 @@
 									echo $text_edit_button;
 								} else {
 							?>
-								<a href="admin.php?page=gp-autoposter&action=edit-feed&feed_id=<?php echo $feedId; ?>" id="btn-update-<?php echo $feedId; ?>" class="<?php echo $class_edit_button; ?> btn-update-feed"><?php echo esc_html( $text_edit_button ); ?></a>
+								<a href="admin.php?page=gp-video-feeds&action=edit-feed&feed_id=<?php echo $feedId; ?>" id="btn-update-<?php echo $feedId; ?>" class="<?php echo $class_edit_button; ?> btn-update-feed"><?php echo esc_html( $text_edit_button ); ?></a>
 							<?php } ?>
 						</td>
 						<td>
-							<input type="button" class="btn-delete <?php echo $class_delete_button; ?>" value="<?php esc_attr( _e( 'x' ) ); ?>" onclick="GrabPressAutoposter.deleteFeed( <?php echo esc_js( $feedId ); ?> );" />
+							<input type="button" class="btn-delete <?php echo $class_delete_button; ?>" value="<?php esc_attr( _e( 'x' ) ); ?>" onclick="GrabPressVideoFeed.deleteFeed( <?php echo esc_js( $feedId ); ?> );" />
 						</td>
 					</tr>
 				</form>
-			<?php } ?>
+			<?php } } ?>
 		</table>
 	</div>
 	<div class="result"></div>
 	<p style="display:none" id="existing_keywords">
-		<?php foreach ( $keywords as $key => $value ) { ?>
+
+		<?php 
+		 		if(isset($keywords) and is_array($keywords)) {
+		      foreach ( $keywords as $key => $value ) { ?>
 			<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>"/>
-		<?php } ?>
+		
+		<?php } } ?>
 	</p>
 	<p style="display:none" id="exact_keywords">
-		<?php foreach ( $phrase as $key => $value ) { ?>
+	<?php
+		if(isset($phrase) and is_array($phrase)) {
+		 foreach ( $phrase as $key => $value ) { ?>
 			<input type="hidden" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $value ); ?>"/>
-		<?php }?>
+		<?php } } ?>
 	</p>
 </fieldset>

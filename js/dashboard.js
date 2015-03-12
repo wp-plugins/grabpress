@@ -1,16 +1,15 @@
 /**
  * Plugin Name: GrabPress
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
- * Description: Configure Grab's AutoPoster software to deliver fresh video
- * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.7
+ * Description: Configure GrabPress feeds to deliver fresh videos to your blog. Link a Grab Media Publisher account to get paid!
+ * Version: 3.0.0
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPLv2 or later
+ * License: GPL2
  */
 
 /**
- * Copyright 2014 blinkx, Inc.
+ * Copyright 2015 Grab Networks, Inc.
  * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -114,16 +113,28 @@ var GrabPressDashboard;
 								if ( 2 === monitor ) {
 									// Append grabDiv to embed
 									var embed = $( "#gcontainer" + embedID ).append( '<div id="grabDiv' + embedID + '"></div>' );
-
+									var $env = $('#environment').val();
 									// Configure active video player
-									self.activeVideo = new com.grabnetworks.Player({
-										'target': embed,
-										'id': embedID,
-										'width': '100%',
-										'height': '100%',
-										'content': anchor.data( 'guid' ),
-										'autoPlay': true
-									});
+									if ( $env === 'grabqa') {
+										self.activeVideo = new com.grabnetworks.Player({
+											'target': embed,
+											'id': embedID,
+											'width': '100%',
+											'height': '100%',
+											'tgt': $env,
+											'content': anchor.data( 'guid' ),
+											'autoPlay': true
+										});
+								    } else {
+								    	self.activeVideo = new com.grabnetworks.Player({
+											'target': embed,
+											'id': embedID,
+											'width': '100%',
+											'height': '100%',
+											'content': anchor.data( 'guid' ),
+											'autoPlay': true
+										});
+								    }
 
 									// Set accordion lock to false
 									accordionLock = false;
@@ -187,7 +198,7 @@ var GrabPressDashboard;
 			// On collapse menu click
 			collapseMenu.on( 'click', function() {
 				// Define vars
-				var topRight = '-122px',
+				var topRight = '0px',
 						smallWidth = 1265,
 						adminMenuWrap = $( '#adminmenuwrap' ),
 						windowWidth = $( window ).width(),
@@ -292,10 +303,8 @@ var GrabPressDashboard;
 					nano = $( '.nano' ),
 					feedTitle = $( '.feed-title' ),
 					message = $( '#message' ),
-					messageTabs = $( '#messages-tabs' ),
-					help = $( '#help' )
+					messageTabs = $( '#messages-tabs' )
 			;
-
 			// If IE9+
 			if ( GrabPressUtils.browserIsIE() && 8.0 < GrabPressUtils.getIEVersion() ) {
 				// If window width is less than 1283 right pane position top not = 0
@@ -356,7 +365,6 @@ var GrabPressDashboard;
 				// Update accordion center height
 				accordionCenter.css( 'height', 'auto' );
 			}
-
 			// Attach event bindings
 			this.watchlistBinding( env, embedID );
 
@@ -378,18 +386,12 @@ var GrabPressDashboard;
 			// Labeled as "hack" in original code
 			message.hide();
 
-			// Attach simpletip to help
-			help.simpletip({
-				content: 'Health displays "results/max results" per the latest feed update. <br /> Feeds in danger of not producing updates display in red or orange, feeds at risk of not producing updates display in yellow, and healthy feeds display in green.  <br /><br />',
-				position: [ 0, 30 ]
-			});
-
 			// Attach resize browser and collapse menu bindings
 			this.resizeBrowserInit();
 			this.collapseMenu();
 
 			// Attach Bootstrap tabs UI to message tabs
-			messageTabs.tabs();
+/*			messageTabs.tabs();*/
 
 			// Attach playlist event
 			this.accordionBinding( env, embedID );
@@ -415,7 +417,6 @@ var GrabPressDashboard;
 				// Do not open video
 				return false;
 			}
-
 			// Build embed HTML
 			embed  = '<div id="gcontainer' + embedID + '" style="display: table-cell; height: 100%;">\n';
 			embed += '	<div id="grabDiv' +embedID + '"></div>\n';
@@ -423,6 +424,7 @@ var GrabPressDashboard;
 
 			// Append embed HTML into accordion inner
 			accordionInner.append( embed );
+
 
 			// Configure active video player
 			this.activeVideo = new com.grabnetworks.Player({
@@ -472,7 +474,7 @@ var GrabPressDashboard;
 				// Define vars
 				var left,
 						smallWidth = 1265,
-						topRight = '-122px'
+						topRight = '0px'
 				;
 
 				// After 150ms
@@ -519,24 +521,16 @@ var GrabPressDashboard;
 						self.activeVideo.pauseVideo();
 					}
 
-					// After 150ms
-					setTimeout( function() {
-						// Update right pane margins
-						rightPane.css({
-							'margin-left': '8px',
-							'margin-top': topRight
-						});
-					}, 150 );
 					// If browser is, IE9+, Chrome, Safari or Opera and window width is
 					// less than 1283px
 				} else if ( ( ( GrabPressUtils.browserIsIE() && 8.0 < GrabPressUtils.getIEVersion() ) || GrabPressUtils.browserIsChrome || GrabPressUtils.browserIsSafari || GrabPressUtils.browserIsOpera ) && 1283 > windowWidth && rightPane.position().top ) {
 					// Show watchlist
 					left.show();
-
 					// If active video is defined
+
 					if ( self.activeVideo ) {
 						//XXX: do NOT Play video why would we? -rs
-						//self.activeVideo.playVideo();
+						self.activeVideo.playVideo();
 					}
 
 					// After 150ms
@@ -557,14 +551,6 @@ var GrabPressDashboard;
 						//self.activeVideo.playVideo();
 					}
 
-					// After 150ms
-					setTimeout( function() {
-						// Update right pane margins
-						rightPane.css({
-							'margin-left': watchlist.width() + 8,
-							'margin-top': -( watchlist.height() )
-						});
-					}, 150 );
 				}
 			}).resize(); // Trigger resize event
 		},
@@ -604,129 +590,9 @@ var GrabPressDashboard;
 
 				// Get accordion content via AJAX
 				$.post( ajaxurl, data, function( response ) {
-				    $('.grabgear').css({display: 'none'});
-					// Define vars
-					var parsedJSON = $.parseJSON( response ),
-							accordion = '',
-							results = parsedJSON.results,
-							style = '',
-							embed = '',
-							collapse = 'collapse',
-							accordion2 = $( '#accordion2' ),
-							rightPane = $( '#t #b .right-pane' ),
-							watchlist = $( '#t #b .watchlist' )
-					;
-
-					// If results exist
-					if ( results && results.length > 0 ) {
-						// Loop through each result
-						for ( var i = 0; i < results.length; i++ ) {
-							// If valid
-							if ( results[ i ] ) {
-								// reset value
-								style = "";
-								embed = "";
-								collapse = "collapse";
-
-								// If not first result
-								if ( 0 != i ) {
-									// Don't display
-									style = 'style="display:none;"';
-								} else { // Is first result
-									// Build embed HTML
-									embed  = '<div id="gcontainer' + embedID + '" style="height: 100%;">\n';
-									embed += '	<div id="grabDiv' + embedID + '"></div>\n';
-									embed += '</div>\n';
-
-									// Update collapse
-									collapse = '';
-								}
-
-								// Build accordion HTML
-								accordion += '<div class="accordion-group">\n';
-								accordion += '	<div class="accordion-heading">\n';
-								accordion += '		<div class="accordion-left"></div>\n';
-								accordion += '		<div class="accordion-center">\n';
-								accordion += '			<a class="accordion-toggle feed-title" data-guid="v' + results[ i ].video.guid + '" data-toggle="collapse" data-parent="#accordion2" href="#collapse' + ( i + 1 ) + '">' + results[ i ].video.title + '</a>\n';
-								accordion += '		</div>\n';
-								accordion	+= '		<div class="accordion-right"></div>\n';
-								accordion += '	</div>\n';
-								accordion += '	<div id="collapse' + ( i + 1 ) + '" class="accordion-body ' + collapse + ' in" ' + style + '>\n';
-								accordion += '		<div class="accordion-inner">\n';
-								accordion += '			' + embed;
-								accordion += '		</div>\n';
-								accordion += '	</div>\n';
-								accordion += '</div>\n';
-							}
-						}
-
-						// Add accordion HTML to accordion2
-						accordion2.html( accordion );
-
-						// Configure active video player
-						this.activeVideo = new com.grabnetworks.Player({
-							'id': embedID,
-							'width': '100%',
-							'height': '100%',
-							'content': results[ 0 ].video.guid,
-							'autoPlay': false
-						});
-
-						// Trigger window resize event
-						$( window ).resize();
-
-						// Toggle visiblity of active video
-						$( '#gcontainer' + embedID + ' object' ).css('visibility','visible');
-					} else { // No results
-						// Build accordion with warning
-						accordion += '<div class="accordion-group">\n';
-						accordion += '	<div class="accordion-heading">\n';
-						accordion += '		<div class="accordion-left"></div>\n';
-						accordion += '		<div class="accordion-center">\n';
-						accordion += '			&nbsp;\n';
-						accordion += '		</div>\n';
-						accordion += '		<div class="accordion-right"></div>\n';
-						accordion += '	</div>\n';
-						accordion += '	<div id="collapse1" class="accordion-body" style="height:95px;">\n';
-						accordion += '		<div class="accordion-inner">\n';
-						accordion += '			<span class="accordion-warning">Add a feed to your watch list in the Feed Activity panel</span>\n';
-						accordion += '		</div>\n';
-						accordion += '	</div>\n';
-						accordion += '</div>\n';
-
-						// Add accordion html to accordion2
-						accordion2.html( accordion );
-					}
-
-					// After 300ms
 					setTimeout( function() {
-						$( window ).resize();
-						// Update right pane dimensions based on watchlist dimensions
-						rightPane.css({
-							'margin-left': watchlist.width(),
-							'margin-top': watchlist.height()
-						});
-					}, 300 );
-
-					// If watchlist check is true
-					if ( $this.val() == "1" ) {
-						// Toggle watch on
-						$this
-							.val( '0' )
-							.addClass( 'watch-on' )
-							.removeClass( 'watch-off' )
-						;
-					} else { // Watchlist false
-						// Toggle watch off
-						$this
-							.val( '1' )
-							.addClass( 'watch-off' )
-							.removeClass( 'watch-on' )
-						;
-					}
-
-					// Update the binding
-					GrabPressDashboard.accordionBinding( env, embedID );
+						location.reload();
+					}, 150 );
 				});
 			});
 		}

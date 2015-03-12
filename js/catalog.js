@@ -1,16 +1,15 @@
 /**
  * Plugin Name: GrabPress
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
- * Description: Configure Grab's AutoPoster software to deliver fresh video
- * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.7
+ * Description: Configure GrabPress feeds to deliver fresh videos to your blog. Link a Grab Media Publisher account to get paid!
+ * Version: 3.0.0
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPLv2 or later
+ * License: GPL2
  */
 
 /**
- * Copyright 2014 blinkx, Inc.
+ * Copyright 2015 Grab Networks, Inc.
  * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -40,7 +39,7 @@ var GrabPressCatalog;
 	 * @class GrabPressCatalog
 	 * @constructor
 	 */
-	GrabPressCatalog = {
+	 GrabPressCatalog = {
 		// Define properties
 		message: $( '#message p' ),
 
@@ -48,9 +47,9 @@ var GrabPressCatalog;
 		 * Configure providers multi-select options
 		 * @type {Object}
 		 */
-		multiSelectOptions: {
-			noneSelectedText: 'Select at least one Provider',
-			selectedText: function( selectedCount, totalCount ) {
+		 multiSelectOptions: {
+		 	noneSelectedText: 'Select at least one Provider',
+		 	selectedText: function( selectedCount, totalCount ) {
 				// If all providers selected
 				if ( totalCount === selectedCount ) {
 					// Return appropriate all string
@@ -66,9 +65,9 @@ var GrabPressCatalog;
 		 * Configure video categories multi-select options
 		 * @type {Object}
 		 */
-		multiSelectOptionsChannels: {
-			noneSelectedText: 'Select at least one Video Category',
-			selectedText: function( selectedCount, totalCount ) {
+		 multiSelectOptionsChannels: {
+		 	noneSelectedText: 'Select at least one Video Category',
+		 	selectedText: function( selectedCount, totalCount ) {
 				// If all video categories selected
 				if ( totalCount === selectedCount ) {
 					// Return appropriate all string
@@ -84,21 +83,21 @@ var GrabPressCatalog;
 		 * Attaches even listener and callback actions to "clear search" link
 		 * @param  {String} action Action to take
 		 */
-		clearSearch: function( action ) {
+		 clearSearch: function( action ) {
 			// Define vars
 			var clearSearchLink = $( '#clear-search' ),
-					keywords = $( '#keywords' ),
-					providers = $( '#provider-select option' ),
-					providersDropdown = $( '#provider-select' ),
-					channels = $( '#channel-select option' ),
-					channelDropdown = $( '#channel-select' ),
-					sortByRelevance = $( '.sort_by[value="relevance"]' ),
-					sortByDate = $( '.sort_by[value="created_at"]' ),
-					createdBefore = $( '#created_before' ),
-					createdAfter = $( '#created_after' ),
-					pagination = $( '#pagination' ),
-					paginationBottom = $( '#pagination-bottom' ),
-					self = this
+			keywords = $( '#keywords' ),
+			providers = $( '#provider-select option' ),
+			providersDropdown = $( '#provider-select' ),
+			channels = $( '#channel-select option' ),
+			channelDropdown = $( '#channel-select' ),
+			sortByRelevance = $( '.sort_by[value="relevance"]' ),
+			sortByDate = $( '.sort_by[value="created_at"]' ),
+			createdBefore = $( '#created_before' ),
+			createdAfter = $( '#created_after' ),
+			pagination = $( '#pagination' ),
+			paginationBottom = $( '#pagination-bottom' ),
+			self = this
 			;
 
 			// Attach click listener to "clear search" link
@@ -107,17 +106,17 @@ var GrabPressCatalog;
 				keywords.val( '' );
 				providers.attr( 'selected', 'selected' );
 				providersDropdown
-					.multiselect("refresh")
-					.multiselect({
-						selectedText: 'All providers selected'
-					})
+				.multiselect("refresh")
+				.multiselect({
+					selectedText: 'All providers selected'
+				})
 				;
 				channels.attr( 'selected', 'selected' );
 				channelDropdown
-					.multiselect( 'refresh' )
-					.multiselect({
-							selectedText: 'All Video Categories'
-					})
+				.multiselect( 'refresh' )
+				.multiselect({
+					selectedText: 'All Video Categories'
+				})
 				;
 				sortByRelevance.removeAttr( 'checked' );
 				sortByDate.attr( 'checked', 'checked' );
@@ -132,13 +131,13 @@ var GrabPressCatalog;
 		/**
 		 * Validates Catalog search form
 		 */
-		doValidation: function( preview ) {
+		 doValidation: function( preview ) {
 			// Define vars
 			var errors = this.hasValidationErrors( preview ),
-					createFeedBtn = $( '#btn-create-feed' ),
-					updateSearchBtn = $( '#update-search' ),
-					allFormInputs = $( ':input' ),
-					hidden = $( '.hide' )
+			createFeedBtn = $( '#btn-create-feed' ),
+			updateSearchBtn = $( '#update-search' ),
+			allFormInputs = $( ':input' ),
+			hidden = $( '.hide' )
 			;
 
 			// If no errors exist
@@ -146,9 +145,9 @@ var GrabPressCatalog;
 				// Enable create feed and update search buttons
 				createFeedBtn.removeAttr( 'disabled' );
 				updateSearchBtn
-					.removeAttr( 'disabled' )
+				.removeAttr( 'disabled' )
 					.off( 'click' ) // Unbind click event
-				;
+					;
 
 				// Show hidden
 				hidden.show();
@@ -156,9 +155,9 @@ var GrabPressCatalog;
 				// Disable create feed and update search buttons
 				createFeedBtn.attr( 'disabled', 'disabled' );
 				updateSearchBtn
-					.attr( 'disabled', 'disabled' )
+				.attr( 'disabled', 'disabled' )
 					.off( 'click' ) // Unbind click event
-				;
+					;
 
 				// Hide hidden
 				hidden.hide();
@@ -181,11 +180,11 @@ var GrabPressCatalog;
 		 * channel and provider select length
 		 * @return {Boolean} Form has validation errors
 		 */
-		hasValidationErrors: function( preview ) {
+		 hasValidationErrors: function( preview ) {
 			// Define vars
 			var errorMessage = 'There was an error connecting to the API! Please try again later!',
-					selectedChannels = $( '#channel-select :selected' ),
-					selectedProviders = $( '#provider-select :selected' )
+			selectedChannels = $( '#channel-select :selected' ),
+			selectedProviders = $( '#provider-select :selected' )
 			;
 
 			// If error message is currently being displayed
@@ -214,36 +213,36 @@ var GrabPressCatalog;
 		/**
 		 * Initialize catalog search forms
 		 */
-		initSearchForm: function() {
+		 initSearchForm: function() {
 			// Define vars
 			var preview,
-					howItWorksLink = $( '#how-it-works' ),
-					helpLink = $( '#help' ),
-					providers = $( '#provider-select option' ),
-					selectedProviders = $( '#provider-select option:selected' ),
-					previewProviders = $( '#provider-select-preview option' ),
-					selectedPreviewProviders = $( '#provider-select-preview option:selected' ),
-					providerDropdown = $( '#provider-select' ),
-					providerPreviewDropdown = $( '#provider-select-preview' ),
-					channels = $( '#channel-select option' ),
-					selectedChannels = $( '#channel-select option:selected' ),
-					previewChannels = $( '#channel-select-preview option' ),
-					selectedPreviewChannels = $( '#channel-select-preview option:selected' ),
-					channelDropdown = $( '#channel-select' ),
-					channelPreviewDropdown = $( '#channel-select-preview' ),
-					url = window.location.href,
-					host = url.split( '/wp-admin/' )[0],
-					datepicker = $( '.datepicker' ),
-					clearDates = $( '#clearDates' ),
-					createdBefore = $( '#created_before' ),
-					createdAfter = $( '#created_after' ),
-					catalogForm = $( '#form-catalog-page' ),
-					message = $( '#message p' ).text(),
-					allFormInputs = $( ':input' ),
-					videoSummaries = $( '.video-summary' ),
-					env = $( '#environment' ).val(),
-					modalID = '1720202',
-					self = this
+			howItWorksLink = $( '#how-it-works' ),
+			helpLink = $( '#help' ),
+			providers = $( '#provider-select option' ),
+			selectedProviders = $( '#provider-select option:selected' ),
+			previewProviders = $( '#provider-select-preview option' ),
+			selectedPreviewProviders = $( '#provider-select-preview option:selected' ),
+			providerDropdown = $( '#provider-select' ),
+			providerPreviewDropdown = $( '#provider-select-preview' ),
+			channels = $( '#channel-select option' ),
+			selectedChannels = $( '#channel-select option:selected' ),
+			previewChannels = $( '#channel-select-preview option' ),
+			selectedPreviewChannels = $( '#channel-select-preview option:selected' ),
+			channelDropdown = $( '#channel-select' ),
+			channelPreviewDropdown = $( '#channel-select-preview' ),
+			url = window.location.href,
+			host = url.split( '/wp-admin/' )[0],
+			datepicker = $( '.datepicker' ),
+			clearDates = $( '#clearDates' ),
+			createdBefore = $( '#created_before' ),
+			createdAfter = $( '#created_after' ),
+			catalogForm = $( '#form-catalog-page' ),
+			message = $( '#message p' ).text(),
+			allFormInputs = $( ':input' ),
+			videoSummaries = $( '.video-summary' ),
+			env = $( '#environment' ).val(),
+			modalID = '1720202',
+			self = this
 			;
 
 			// Attach Simpletip to "how it works" link
@@ -406,14 +405,14 @@ var GrabPressCatalog;
 		 * Pagination
 		 * @param  {String} action Action to take
 		 */
-		pagination: function( action ) {
+		 pagination: function( action ) {
 			// Define vars
 			var pagination = $( '#pagination' ),
-					paginationBottom = $( '#pagination-bottom' ),
-					feedCount = $( '#feed_count' ).val(),
-					createFeedBtn = $( '#btn-create-feed' ),
-					keywords = $( '#keywords' ),
-					self = this
+			paginationBottom = $( '#pagination-bottom' ),
+			feedCount = $( '#feed_count' ).val(),
+			createFeedBtn = $( '#btn-create-feed' ),
+			keywords = $( '#keywords' ),
+			self = this
 			;
 
 			// Configure pagination
@@ -455,17 +454,17 @@ var GrabPressCatalog;
 		 * Initialize insert into post AJAX search form
 		 * @return {[type]} [description]
 		 */
-		postSearchForm: function() {
+		 postSearchForm: function() {
 			// Define var
 			var currentTop,
-					window = $( window ),
-					multiselect = $( '.ui-multiselect' ),
-					mulltiselectMenu = $( '.ui-multiselect-menu' ),
-					thickboxContent = $( '#tb-ajax-content' ),
-					catalogForm = $( '#form-catalog-page' ),
-					sortBys = $( '.sort_by' ),
-					insertIntoPost = $( '.insert_into_post' ),
-					self = this
+			window = $( window ),
+			multiselect = $( '.ui-multiselect' ),
+			mulltiselectMenu = $( '.ui-multiselect-menu' ),
+			thickboxContent = $( '#tb-ajax-content' ),
+			catalogForm = $( '#form-catalog-page' ),
+			sortBys = $( '.sort_by' ),
+			insertIntoPost = $( '.insert_into_post' ),
+			self = this
 			;
 
 			// On window scroll
@@ -521,7 +520,7 @@ var GrabPressCatalog;
 			insertIntoPost.on( 'click', function() {
 				// Define vars
 				var data,
-						videoID = this.id.replace( /btn-create-feed-single-/gi, '' )
+				videoID = this.id.replace( /btn-create-feed-single-/gi, '' )
 				;
 
 				// Build data object
@@ -557,11 +556,11 @@ var GrabPressCatalog;
 		/**
 		 * Submit search request for preview
 		 */
-		previewSearchForm: function() {
+		 previewSearchForm: function() {
 			// Define vars
 			var catalogForm = $( '#form-catalog-page' ),
-					sortBys = $( '.sort_by' ),
-					self = this
+			sortBys = $( '.sort_by' ),
+			self = this
 			;
 
 			// On catalog form submit
@@ -593,13 +592,13 @@ var GrabPressCatalog;
 		 * Handles initial setup of pagination
 		 * @param  {String} action Action to take
 		 */
-		setupPagination: function( action ) {
+		 setupPagination: function( action ) {
 			// Define vars
 			var content, top, results,
-					pagination = $( '#pagination' ),
-					paginationBottom = $( '#pagination-bottom' ),
-					catalogAction = $( '#action-catalog' ),
-					position = ''
+			pagination = $( '#pagination' ),
+			paginationBottom = $( '#pagination-bottom' ),
+			catalogAction = $( '#action-catalog' ),
+			position = ''
 			;
 
 			// If no pagination does not exist
@@ -663,11 +662,11 @@ var GrabPressCatalog;
 
 						// Apply margins and class to bottom pagination
 						paginationBottom
-							.css({
-								'margin-top': '10px',
-								'margin-bottom': '15px'
-							})
-							.addClass( 'light-theme' )
+						.css({
+							'margin-top': '10px',
+							'margin-bottom': '15px'
+						})
+						.addClass( 'light-theme' )
 						;
 
 						// Clone top pagination into bottom pagination
@@ -681,19 +680,19 @@ var GrabPressCatalog;
 		 * Submit clear searc form
 		 * @param  {String} action Action to take
 		 */
-		submitClear: function( action ) {
+		 submitClear: function( action ) {
 			// Define vars
 			var data,
-					keywords = $( '#keywords' ).val(),
-					providersDropdown = $( '#provider-select' ),
-					channelDropdown = $( '#channel-select' ),
-					sortBy = $( '.sort_by:checked' ).val(),
-					createdBefore = $( '#created_before' ).val(),
-					createdAfter = $( '#created_after' ).val(),
-					catalogContainer = $( '#gp-catalog-container' ),
-					pagination = $( '#pagination' ),
-					paginationBottom = $( '#pagination-bottom' ),
-					self = this
+			keywords = $( '#keywords' ).val(),
+			providersDropdown = $( '#provider-select' ),
+			channelDropdown = $( '#channel-select' ),
+			sortBy = $( '.sort_by:checked' ).val(),
+			createdBefore = $( '#created_before' ).val(),
+			createdAfter = $( '#created_after' ).val(),
+			catalogContainer = $( '#gp-catalog-container' ),
+			pagination = $( '#pagination' ),
+			paginationBottom = $( '#pagination-bottom' ),
+			self = this
 			;
 
 			// Build data object
@@ -729,21 +728,21 @@ var GrabPressCatalog;
 		 * @param  {String} action Action to be taken
 		 * @param  {String|Integer} page   Page number
 		 */
-		submitSearch: function( action, page ) {
+		 submitSearch: function( action, page ) {
 			// Define vars
 			var content,
-					data = {},
-					display = '',
-					channel = '',
-					provider = '',
-					channelSelectPreview = $( '#channel-select-preview' ),
-					channelDropdown = $( '#channel-select' ),
-					providerSelectPreview = $( '#provider-select-preview' ),
-					providerDropdown = $( '#provider-select' ),
-					catalogAction = $( '#action-catalog' ).val(),
-					pagination = $( '#pagination' ),
-					paginationBottom = $( '#pagination-bottom' ),
-					self = this
+			data = {},
+			display = '',
+			channel = '',
+			provider = '',
+			channelSelectPreview = $( '#channel-select-preview' ),
+			channelDropdown = $( '#channel-select' ),
+			providerSelectPreview = $( '#provider-select-preview' ),
+			providerDropdown = $( '#provider-select' ),
+			catalogAction = $( '#action-catalog' ).val(),
+			pagination = $( '#pagination' ),
+			paginationBottom = $( '#pagination-bottom' ),
+			self = this
 			;
 
 			// If action is get catalog tab
@@ -820,28 +819,28 @@ var GrabPressCatalog;
 			});
 		},
 
+
 		/* Initialization specific to Catalog tab template page */
 		/**
 		 * Initialize Catalog tab template page
 		 * @param  {String} action Action to be taken
 		 */
-		tabSearchForm: function( action ) {
+		 publishVideo: function( action ) {
 			// Define vars
 			var closePreviews = $( '.close-preview' ),
-					createFeedBtn = $( '#btn-create-feed' ),
-					createSingleFeedBtns = $( '.btn-create-feed-single' ),
-					clearSearchLink = $( '#clear-search' ),
-					sortBys = $( '.sort_by' ),
-					env = $( '#environment' ),
-					modalID = '1720202',
-					self = this
-			;
-
+			createFeedBtn = $( '#btn-create-feed' ),
+			createSingleFeedBtns = $( '.btn-create-feed-single' ),
+			clearSearchLink = $( '#clear-search' ),
+			sortBys = $( '.sort_by' ),
+			env = $( '#environment' ), 
+			modalID = '1720202',
+			self = this;
+	
 			// Attach click event listener to close preview buttons
 			closePreviews.on( 'click', function() {
 				// Define vars
 				var previewFeedForm = $( '#preview-feed' ),
-						previewAction = $( '#action-preview-feed' )
+				previewAction = $( '#action-preview-feed' )
 				;
 
 				// TODO: Figure out where feed_action should come from
@@ -851,42 +850,97 @@ var GrabPressCatalog;
 				previewFeedForm.submit();
 			});
 
-			// Attach click event listener to create feed button
+		
+
+
+	createSingleFeedBtns.click( function() {
+	 
+        // Define vars
+        var data,
+        videoID = this.id.replace( /btn-create-feed-single-/gi, '' ),
+        widthEl = $("input#p_width"),
+        heightEl = $("input#p_height");
+
+        widthEl.val('640');
+        heightEl.val('360');
+        widthEl.change( function(){
+        	height = widthEl.val()/16;
+        	height = height*9;
+        	heightEl.val(parseInt(height));
+        });
+
+        $('#dialog-form').dialog({
+        	resizable: false,
+        	dialogClass: 'confirmation',
+        	closeOnEscape: true,
+        	buttons:{
+        		Cancel: function(){
+        			$('.embed_code').css('display','none');
+        			$(this).dialog("close");
+        		},
+        		"Save": function(){
+
+        			var autoplay = $('#autoplay').prop( "checked" );
+
+        			width =  widthEl.val();
+        			height = heightEl.val();
+
+        			if ( width > 400 && !isNaN(height) ){
+
+
+        				$('.embed_code').css('display','block').text('Your video Player embed will now be added to your new post page.');
+                        // Build data object
+                        data = {
+                        	action: 'gp_insert_video',
+                        	format: 'post',
+                        	video_id: videoID,  
+                        	width: width, 
+                        	height: height,
+                        	auto_play: autoplay
+
+                        };
+                        // Insert video via AJAX
+                        $.post( ajaxurl, data, function( response ) {
+                            // If redirect required
+                            if ( 'redirect' === response.status ) {
+                                // Redirect to reponse URL
+                                window.location = response.url;
+                              }
+                            }, 'json' );
+
+
+                      } else {
+
+                      	$('.embed_code').css('display','block');
+                      	if (isNaN(height)){
+                      		$('.embed_code').text('Please enter a valid height number.');                            
+                      	}
+                      	if ( width < 400 ){
+                      		$('.embed_code').text('Please set your player to a minimum of 400 pixels wide.');                            
+                      	}
+
+
+                      }
+
+                    }
+                  }
+                })
+
+  });
+
+	//Attach click event listener to create feed button
 			createFeedBtn.on( 'click', function() {
+
 				// Define vars
 				var catalogForm = $( '#form-catalog-page' ),
-						catalogAction = $( '#action-catalog' )
-				;
+				catalogAction = $( '#action-catalog' );
 
 				// Update action
 				catalogAction.val( 'prefill' );
-				catalogForm.attr( 'action', 'admin.php?page=gp-autoposter' );
+				catalogForm.attr( 'action', 'admin.php?page=gp-video-feeds' ); 
 
 				// Submit catalog form
 				catalogForm.submit();
-			});
-
-			createSingleFeedBtns.on( 'click', function() {
-				// Define vars
-				var data,
-						videoID = this.id.replace( /btn-create-feed-single-/gi, '' )
-				;
-
-				// Build data object
-				data = {
-					action: 'gp_insert_video',
-					format: 'post',
-					video_id: videoID
-				};
-
-				// Insert video via AJAX
-				$.post( ajaxurl, data, function( response ) {
-					// If redirect required
-					if ( 'redirect' === response.status ) {
-						// Redirect to reponse URL
-						window.location = response.url;
-					}
-				}, 'json' );
 			});
 
 			clearSearchLink.on( 'click', function() {
@@ -935,17 +989,17 @@ var GrabPressCatalog;
 		/**
 		 * Calculate position for Thickbox based on current window size
 		 */
-		getTBPosition: function() {
+		 getTBPosition: function() {
 			// Define vars
 			var spartaPaymentWidth = 930,
-					windowWidth = $( window ).width(),
-					windowHeight = $( window ).height(),
-					tbNewWidth = windowWidth < spartaPaymentWidth + 40 ? windowWidth - 40 : spartaPaymentWidth,
-					tbNewHeight = windowHeight - 70,
-					tbNewMargin = ( windowWidth - spartaPaymentWidth ) / 2,
-					tbWindow = $( '#TB_window' ),
-					tbWindowAndIFrame = $( '#TB_window, #TB_iframeContent' ),
-					tbAJAXContent = $( '#TB_ajaxContent' )
+			windowWidth = $( window ).width(),
+			windowHeight = $( window ).height(),
+			tbNewWidth = windowWidth < spartaPaymentWidth + 40 ? windowWidth - 40 : spartaPaymentWidth,
+			tbNewHeight = windowHeight - 70,
+			tbNewMargin = ( windowWidth - spartaPaymentWidth ) / 2,
+			tbWindow = $( '#TB_window' ),
+			tbWindowAndIFrame = $( '#TB_window, #TB_iframeContent' ),
+			tbAJAXContent = $( '#TB_ajaxContent' )
 			;
 
 			// Set position
@@ -954,12 +1008,12 @@ var GrabPressCatalog;
 				'margin-top': -( tbNewHeight / 2 )
 			});
 			tbWindowAndIFrame
-				.width( tbNewWidth )
-				.height( tbNewHeight )
+			.width( tbNewWidth )
+			.height( tbNewHeight )
 			;
 			tbAJAXContent
-				.width( tbNewWidth - 33 )
-				.height( tbNewHeight - 29 )
+			.width( tbNewWidth - 33 )
+			.height( tbNewHeight - 29 )
 			;
 		}
 

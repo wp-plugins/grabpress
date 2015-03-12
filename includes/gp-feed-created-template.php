@@ -5,7 +5,7 @@
 		// Define vars
 		var gpRedirectTime,
 				wpBodyContent = $( '#wpbody-content' ),
-				gpRedirectURL = 'admin.php?page=gp-autoposter',
+				gpRedirectURL = 'admin.php?page=gp-video-feeds',
 				gpRedirectSeconds = 4
 		;
 
@@ -48,7 +48,7 @@
 </script>
 
 <div id="message-feed-created" class="updated fade">
-	<p>Feed created successfully.  Redirecting in 5 seconds ...  If you are not redirected automatically, please press <a href="admin.php?page=gp-autoposter">here</a></p>
+	<p>Feed created successfully.  Redirecting in 5 seconds ...  If you are not redirected automatically, please press <a href="admin.php?page=gp-video-feeds">here</a></p>
 </div>
 
 <?php

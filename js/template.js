@@ -1,16 +1,15 @@
 /**
  * Plugin Name: GrabPress
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
- * Description: Configure Grab's AutoPoster software to deliver fresh video
- * direct to your Blog. Link a Grab Media Publisher account to get paid!
- * Version: 2.3.7
+ * Description: Configure GrabPress feeds to deliver fresh videos to your blog. Link a Grab Media Publisher account to get paid!
+ * Version: 3.0.0 
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
- * License: GPLv2 or later
+ * License: GPL2
  */
 
 /**
- * Copyright 2014 blinkx, Inc.
+ * Copyright 2015 Grab Networks, Inc.
  * (email: support@grab-media.com)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -56,10 +55,7 @@ var GrabPressTemplate;
 					templateForm = $( '.template-form' ),
 					playerWidth = $( '#player_width' ),
 					playerRatio = $( '#ratiowide' ),
-					playerRatiostand = $( '#ratiostand' )
-					
-					
-			;
+					playerRatiostand = $( '#ratiostand' ); 
 
 			// If current message displayed is predetermined API connection error
 			// message
@@ -68,7 +64,7 @@ var GrabPressTemplate;
 				this.allFormInputs.attr( 'disabled', 'disabled' );
 			}
 
-			// Configure default options for 400px message modal
+			// Configure default options for 400 px message modal
 			this.modal300.dialog({
 				autoOpen: false,
 				width: 400,
@@ -108,10 +104,14 @@ var GrabPressTemplate;
 
 			// When any change is made in the form or any of its inputs set the
 			// display of confirm message to true
-			formAndInputs.on( 'change', this.setConfirmUnload( true ) );
+			formAndInputs.on( 'change', function(){
+				return;
+			});
 
 			// Once form is submitted, turn off display of confirm message
-			templateForm.on( 'submit', this.setConfirmUnload( false ) );
+			templateForm.on( 'submit', function(){
+				return;
+			});
 		},
 
 		/**
@@ -129,26 +129,6 @@ var GrabPressTemplate;
 			this.playerWidthInput.value = this.defaultPlayerWidth;
 			this.updateHeightValue();
 		},
-
-		/**
-		 * Presents a message to the user to confirm that the window should unload
-		 * its resources even though changes have not been saved.
-		 * @param {Boolean} shouldDisplay Should display unload message
-		 */
-		setConfirmUnload: function( shouldDisplay ) {
-			window.onbeforeunload = ( shouldDisplay ) ? this.unloadMessage : null;
-		},
-
-		/**
-		 * Returns unload confirm message
-		 * @return {String} Unload confirm message
-		 */
-		unloadMessage: function() {
-			return 'You have entered new data on this page. If you navigate away ' +
-			'from this page without first saving your data, the changes will be ' +
-			'lost.';
-		},
-
 		/**
 		 * Updates the height value and the template preview
 		 */
@@ -224,16 +204,17 @@ var GrabPressTemplate;
 					form = $( 'form' ),
 					playerWidth = form.find( 'input[name="width"]' ).val(),
 					playerRatio = form.find( 'input[name="ratio"]:checked' ).val(),
-					savebutton  =  $('#btn-create-feed')
+					savebutton  =  $('#btn-create-feed'),
+					error = $('#gp-template-player .error')
 			;
-
+			
+			error.hide();
 			// If player width is NaN
 			if ( isNaN( playerWidth ) ) {
 				// Create alert popup
-				alert( 'Please enter a numeric value!' );
-
-				// Reset width to default
-				this.resetHeight();
+				message = 'Please enter a numeric value!';
+				error.show().text(message);
+				savebutton.attr( 'disabled', 'disabled' );
 
 				// Prevent browser default behavior
 				return false;
@@ -243,7 +224,7 @@ var GrabPressTemplate;
 			if ( playerWidth < 400  ) {
 				// Set message text
 				message = 'The minimum width for a Grab Video Player is 400px wide.';
-				alert(message);
+				error.show().text(message);
 				savebutton.attr( 'disabled', 'disabled' );
 				return false;
 			}
@@ -264,7 +245,7 @@ var GrabPressTemplate;
 
 				// Set message text using dynamic dimension text
 				message = 'Creating an embed larger than the video\'s native size ' + dimensionText + ' may result in pixelated video.';
-				alert(message);
+				error.show().text(message);
 				savebutton.attr( 'disabled', 'disabled' );
 				return false;
 			}

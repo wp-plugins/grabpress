@@ -6,7 +6,7 @@
 		var gpRedirectTime,
 				message = $( '#message' ),
 				wpBodyContent = $( '#wpbody-content' ),
-				gpRedirectURL = 'admin.php?page=gp-autoposter',
+				gpRedirectURL = 'admin.php?page=gp-video-feeds',
 				gpRedirectSeconds = 4
 		;
 

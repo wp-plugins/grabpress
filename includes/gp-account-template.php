@@ -11,7 +11,7 @@
 		}
 
 		// Check if email linked to user account
-		$linked = isset( $user->email );
+		$linked = isset( $user->user->email );
 
 		// If email linked
 		if( $linked ) {

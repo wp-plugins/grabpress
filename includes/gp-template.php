@@ -1,8 +1,8 @@
 <?php $checked = 'checked="checked"'; ?>
-<div class="wrap">
+<div id="gp-template-player" class="wrap">
 <img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'images/logo-dark.png' ); ?>" alt="Logo" />
 	<h2>GrabPress: Edit the player template for video posts</h2>
-	<p>Video that fits your site design</p>
+	<p>Video that fits your site design</p><p class="error" style="display:none"></p>
 	<form action="" method="POST" class="template-form">
 		<input type="hidden" name="action" value="<?php echo esc_attr( $form['action'] ); ?>" />
 		<input type="hidden" id="player_width_orig" name="width_orig" value="<?php echo esc_attr( $form['width'] ); ?>" />
@@ -38,7 +38,7 @@
 			</table>
 		</fieldset>
 	</form>
-	<div class="template-preview" style="width:<?php echo esc_attr( $form['width'] ); ?>px;height:<?php echo esc_attr( $form['height'] ); ?>px;">
+	<div class="template-preview" style="width:<?php echo esc_attr( $form['width'] ); ?>px;height:<?php echo isset( $form['height'] ) ? esc_attr( $form['height'] ) : '' ; ?>px;">
 		<div class="widescreen" <?php if ( ! $form['widescreen_selected'] ) { ?>style="display:none;" <?php } ?> ></div>
 		<div class="standard" <?php if ( ! $form['standard_selected'] ) { ?>style="display:none;" <?php } ?> ></div>
 	</div>

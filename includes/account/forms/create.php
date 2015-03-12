@@ -1,5 +1,5 @@
 <fieldset id="account" class="create">
-	<legend>Create Account</legend>
+	<div class="gp-general-settings-subtitle">Create Account</div>
 	<form method="post" id="register">
 		<input id="id_action" type="hidden" name="action" value="create-user" />
 		<table>
@@ -193,13 +193,13 @@
 			</tr>
 		</table>
 		<input type="hidden" name="url" id="id_url" />
-	</form>
 	<div id="buttons">
 		<span id="required" class="account-help">Note: All fields marked with an asterisk* are required.</span>
 		<a id="clear-form" href ="#">clear form</a>
-		<input type="button" class="button-primary" disabled="disabled" id="submit-button" value="<?php esc_attr( _e( $text = 'switch' == $request[ 'action' ] ? 'Change' : 'Link' . ' Account' ) ); ?>"/>
+		<input type="button" class="button-primary" id="submit-button" value="<?php esc_attr( _e( $text = 'switch' == isset($request['request'][ 'action' ]) ? 'Change' : 'Create' . ' Account' ) ); ?>"/>
 		<input type="button" class="button-secondary" id="cancel-button" value="<?php esc_attr( _e( 'Cancel' ) ); ?>"/>
 	</div>
+	</form>
 </fieldset>
 <script>
 	// TODO: Remove inline JavaScript
@@ -255,7 +255,7 @@
 					}
 				} else { // Form unchanged
 					// Redirect to account page
-					window.location = 'admin.php?page=gp-account';
+					window.location = 'options-general.php?page=grab-press-general-setting';
 				}
 			});
 
@@ -272,17 +272,9 @@
 				doValidation();
 			});
 
-			// On any change to form or its inputs
-			formAndAllInputs.on( 'change', function() {
-				// Enable confirmation (onbeforeunload)
-				setConfirmUnload( true );
-			});
-
-			// On register submit
-			register.on( 'submit', function() {
-				// Disable confirmation (onbeforeunload)
-				setConfirmUnload( false );
-			});
+		
+		
+		
 
 			/**
 			 * Executes validate and toggles availability of submit button
@@ -328,25 +320,6 @@
 			}
 
 			/**
-			 * Presents a message to the user to confirm that the window should unload
-			 * its resources even though changes have not been saved.
-			 * @param {Boolean} shouldDisplay Should display unload message
-			 */
-			function setConfirmUnload( shouldDisplay ) {
-				window.onbeforeunload = ( shouldDisplay ) ? unloadMessage : null;
-			}
-
-			/**
-			 * Returns unload confirm message
-			 * @return {String} Unload confirm message
-			 */
-			function unloadMessage() {
-				return 'You have entered new data on this page. If you navigate away ' +
-				'from this page without first saving your data, the changes will be ' +
-				'lost.';
-			}
-
-			/**
 			 * Validates all form fields
 			 * @return {Boolean} All form fields are valid
 			 */
@@ -356,7 +329,7 @@
 						pass = $( '#id_password' ).val(),
 						phone = $( '#id_phone_number' ).val(),
 						url = $( '#id-protocol' ).val() + $( '#id-site' ).val(),
-						emailValid = $( '#id_email' ).val().match( /[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/i ),
+						emailValid = $( '#register input[name="email"]' ).val().match( /[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/i ),
 						emailOk = $( '#email_ok' ),
 						passValid = ( pass.length > 5 ),
 						passMatch = passValid && $( '#id_password2' ).val() === pass,
@@ -374,7 +347,7 @@
 						stateOk = $( '#state_ok' ),
 						zipValid = notEmpty( 'id_zip' ),
 						zipOk = $( '#zip_ok' ),
-						agreeValid = $( '#id-agree' ).attr( 'checked' ),
+						agreeValid = $( '#id-agree' ).is(':checked'),
 						urlValid = url.match( /([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}/gi ),
 						urlOk = $( '#url_ok' ),
 						message = $( '#message p' ),
@@ -392,7 +365,7 @@
 				stateOk.css( 'visibility', stateValid ? 'visible': 'hidden' );
 				zipOk.css( 'visibility', zipValid ? 'visible': 'hidden' );
 				urlOk.css( 'visibility', urlValid ? 'visible': 'hidden' );
-
+				
 				// Check if all fields are valid
 				if ( emailValid && passValid && passMatch && firstValid && lastValid && addressValid && cityValid && stateValid && zipValid && agreeValid && urlValid ) {
 					valid = true; // All fields valid

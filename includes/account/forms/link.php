@@ -55,17 +55,13 @@
 
 		// On any change to form or its inputs
 		formAndAllInputs.on( 'change', function() {
-			// Enable confirmation (onbeforeunload)
-			setConfirmUnload( true );
-
 			// Update form changed status
 			formChanged = true;
 		});
 
 		// On register submit
 		linkExisting.on( 'submit', function() {
-			// Disable confirmation (onbeforeunload)
-			setConfirmUnload( false );
+            return true;
 		});
 
 		// On cancel button click
@@ -91,7 +87,7 @@
 					}
 
 					// Check email linked to user account
-					$linked = isset( $user->email );
+					$linked = isset( $user->user->email );
 
 					// If email linked
 					if( $linked ) {
@@ -154,25 +150,6 @@
 			}
 
 			return false;
-		}
-
-		/**
-		 * Presents a message to the user to confirm that the window should unload
-		 * its resources even though changes have not been saved.
-		 * @param {Boolean} shouldDisplay Should display unload message
-		 */
-		function setConfirmUnload( shouldDisplay ) {
-			window.onbeforeunload = ( shouldDisplay ) ? unloadMessage : null;
-		}
-
-		/**
-		 * Returns unload confirm message
-		 * @return {String} Unload confirm message
-		 */
-		function unloadMessage() {
-			return 'You have entered new data on this page. If you navigate away ' +
-			'from this page without first saving your data, the changes will be ' +
-			'lost.';
 		}
 
 		/**
