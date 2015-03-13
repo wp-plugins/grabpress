@@ -1,9 +1,9 @@
 === GrabPress ===
-Contributors: grabmedia, blinkxdev
+Contributors: grabmedia
 Tags: video, grab, grabpress, grab media, grab-media, grab networks, rhythm one, rhythmone, rhythm new media, burst media, pre-roll, video catalog, media, video feed, video player, HTML5 video, video content, professional video, premium video, advertising, syndication, ad units, video widgets
 Requires at least: 3.7.1   
 Tested up to: 4.1.1  
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -116,11 +116,16 @@ No. All users are provided pertinent information for debugging and support purpo
 
 == Changelog ==  
 
+= 3.0.1 =
+*Features:*
+
+*Bug Fixes:*
+ * GBPS-642	Published video posts are not showing any videos for old Autoposter posts
 
 = 3.0.0 =
 *Features:*
 	
- * GBPS-476	As a publisher, I need all Jetpack and WordPress connection setup steps removed from the WordPress settings GrabPress page
+ * GBPS-476	As a publisher, I need all v2.4 Jetpack and WordPress connection setup steps removed from the WordPress settings GrabPress page 
  * GBPS-478	As a publisher, I want to navigate GrabPress with Video Feeds page, instead of Autoposter
  * GBPS-479	As a publisher, I want my GrabPress dashboard to show information about my Catalog API feeds
  * GBPS-480	As a publisher, I want to be able to browse my feeds and create a post from the 'Select a Video From Feeds' tab in the Video Feeds Page
