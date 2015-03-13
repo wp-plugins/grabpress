@@ -4,7 +4,7 @@
  * Plugin Name: GrabPress
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure GrabPress feeds to deliver fresh videos to your blog. Link a Grab Media Publisher account to get paid!
- * Version: 3.0.0
+ * Version: 3.0.1
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
  * License: GPL2
