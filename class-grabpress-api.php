@@ -49,7 +49,6 @@ if (!class_exists('Grabpress_API')) {
                     try {
 
                         $response = wp_remote_get($request_url, $args);
-                 
                     } catch (Exception $e) { // If request unsuccessful
                         // Log custom fatal error
                         Grabpress::abort('API call error: ' . $e->getMessage());
@@ -171,8 +170,6 @@ if (!class_exists('Grabpress_API')) {
                 $api_key = $user_data->user->tokens[0]->access_key;
                 $user_id = $user_data->user->tokens[0]->user_id;
                 $account_id = $user_data->user->account_id;
-   
-
             } catch (Exception $ex) {
                 
             }
@@ -193,7 +190,6 @@ if (!class_exists('Grabpress_API')) {
             return true;
         }
 
-
         /**
          * Creates necessary embeds for the user
          * @param $auto_play string either 0 or 1
@@ -202,147 +198,150 @@ if (!class_exists('Grabpress_API')) {
          */
         static function create_embed($auto_play, $video_id) {
             $is_vip = Grabpress::is_wp_dot_com();
-            GrabPress::log ( $video_id );
-            Grabpress::$api_key = get_option ( 'grabpress_key' );
-            Grabpress::$user_id = get_option ( 'grabpress_user_id' );
-            $embed_data = array (
-                    'embed' => array (
-                            'content_id' => $video_id,
-                            'content_type' => 'video',
-                            'owner_id' => Grabpress::$user_id,
-                            'label' => 'Default GrabPress Player (CTP)',
-                            'ad_server_id' => 5,
-                            'ad_key' => 'voxant',
-                            'ad_rules_url' => 'http://player.grabnetworks.com/ads/rules.json',
-                            'auto_play' => $auto_play,
-                            'width' => 640,
-                            'height' => 360,
-                            'skin_url' => 'swf/OSMFSkin.swf',
-                            'companion_id' => 'sidebar-top-ads',
-                            'companion_type' => 'floating',
-                            'javascript_namespace' => 'grabPlayerJS',
-                            'javascript_event_handler' => 'playerEventHandler',
-                            'ad_tier_name' => 'CMP',
-                            'ad_tier_id' => 2,
-                            'product_type_id' => $is_vip ? GP_VIP_PRODUCT_TYPE_ID : GP_PRODUCT_TYPE_ID 
-                    ) 
+            GrabPress::log($video_id);
+            Grabpress::$api_key = get_option('grabpress_key');
+            Grabpress::$user_id = get_option('grabpress_user_id');
+            $embed_data = array(
+                'embed' => array(
+                    'content_id' => $video_id,
+                    'content_type' => 'video',
+                    'owner_id' => Grabpress::$user_id,
+                    'label' => 'Default GrabPress Player (CTP)',
+                    'ad_server_id' => 5,
+                    'ad_key' => 'voxant',
+                    'ad_rules_url' => 'http://player.grabnetworks.com/ads/rules.json',
+                    'auto_play' => $auto_play,
+                    'width' => 640,
+                    'height' => 360,
+                    'skin_url' => 'swf/OSMFSkin.swf',
+                    'companion_id' => 'sidebar-top-ads',
+                    'companion_type' => 'floating',
+                    'javascript_namespace' => 'grabPlayerJS',
+                    'javascript_event_handler' => 'playerEventHandler',
+                    'ad_tier_name' => 'CMP',
+                    'ad_tier_id' => 2,
+                    'product_type_id' => $is_vip ? GP_VIP_PRODUCT_TYPE_ID : GP_PRODUCT_TYPE_ID
+                )
             );
-                      
+
             try {
-                $embed_json = self::call ( 'POST', '/embeds?api_key=' . GrabPress::$api_key, $embed_data, false );
-            } catch ( Exception $e ) {
+                $embed_json = self::call('POST', '/embeds?api_key=' . GrabPress::$api_key, $embed_data, false);
+            } catch (Exception $e) {
                 // Log exception error message
-                Grabpress::message ( 'API call exception: ' . $e->getMessage () );
+                Grabpress::message('API call exception: ' . $e->getMessage());
             }
-            Grabpress::log ( "Specific embed ID is". $embed_json . " and the video ID is". $video_id);
+            Grabpress::log("Specific embed ID is" . $embed_json . " and the video ID is" . $video_id);
             // Embeds successfully created
-            return json_decode($embed_json); 
+            return json_decode($embed_json);
         }
 
-
-		
-		/**
-		 * Creates necessary embeds for the user
-		 *
-		 * @return boolean embeds successfully created
-		 */
-		static function create_embeds() {
-			Grabpress::log ( "Entered create_embeds" );
-			Grabpress::$api_key = get_option ( 'grabpress_key' );
-			Grabpress::$user_id = get_option ( 'grabpress_user_id' );
-			$video_id = self::get_latest_video ();
-			GrabPress::log ( $video_id );
+        /**
+         * Creates necessary embeds for the user
+         *
+         * @return boolean embeds successfully created
+         */
+        static function create_embeds() {
+            Grabpress::log("Entered create_embeds");
+            Grabpress::$api_key = get_option('grabpress_key');
+            Grabpress::$user_id = get_option('grabpress_user_id');
+            $video_id = self::get_latest_video();
             $is_vip = Grabpress::is_wp_dot_com();
-			$ctp_embed_data = array (
-					'embed' => array (
-							'content_id' => $video_id,
-							'content_type' => 'video',
-							'owner_id' => Grabpress::$user_id,
-							'label' => 'Default GrabPress Player (CTP)',
-							'ad_server_id' => 5,
-							'ad_key' => 'voxant',
-							'ad_rules_url' => 'http://player.grabnetworks.com/ads/rules.json',
-							'auto_play' => 'false',
-							'width' => 600,
-							'hieght' => 450,
-							'skin_url' => 'swf/OSMFSkin.swf',
-							'companion_id' => 'sidebar-top-ads',
-							'companion_type' => 'floating',
-							'javascript_namespace' => 'grabPlayerJS',
-							'javascript_event_handler' => 'playerEventHandler',
-							'ad_tier_name' => 'CMP',
-							'ad_tier_id' => 2,
-							'product_type_id' => $is_vip ? GP_VIP_PRODUCT_TYPE_ID : GP_PRODUCT_TYPE_ID 
-					) 
-			);
-			$ap_embed_data = array (
-					'embed' => array (
-							'content_id' => $video_id,
-							'content_type' => 'video',
-							'owner_id' => Grabpress::$user_id,
-							'label' => 'Default GrabPress Player (AP)',
-							'ad_server_id' => 5,
-							'ad_key' => 'voxant',
-							'ad_rules_url' => 'http://player.grabnetworks.com/ads/rules.json',
-							'auto_play' => 'true',
-							'width' => 600,
-							'hieght' => 450,
-							'skin_url' => 'swf/OSMFSkin.swf',
-							'companion_id' => 'sidebar-top-ads',
-							'companion_type' => 'floating',
-							'javascript_namespace' => 'grabPlayerJS',
-							'javascript_event_handler' => 'playerEventHandler',
-							'ad_tier_name' => 'CMP',
-							'ad_tier_id' => 2,
-							'product_type_id' => $is_vip ? GP_VIP_PRODUCT_TYPE_ID : GP_PRODUCT_TYPE_ID 
-					)
-			);			
-			try {
-				$embed_json = self::call ( 'POST', '/embeds?api_key=' . GrabPress::$api_key, $ctp_embed_data, false );
-			} catch ( Exception $e ) {
-				// Log exception error message
-				Grabpress::message ( 'API call exception: ' . $e->getMessage () );
-			}
-			try {
-				$embed_json = self::call ( 'POST', '/embeds?api_key=' . GrabPress::$api_key, $ap_embed_data, false );
-			} catch ( Exception $e ) {
-				// Log exception error message
-				Grabpress::message ( 'API call exception: ' . $e->getMessage () );
-			}
-			// Embeds successfully created
-			return true;
-		}
-		
-		/**
-		 * Get the latest video from the catalog
-		 * used for creating the embed
-		 */		
-		static function get_latest_video() {
-			$video_data = self::call ( 'GET', '/catalogs/1/videos?limit=1', array (), false );
-			$result = json_decode ( $video_data, true );
-			return $result [0] ["video"] ["id"];
-		}
-		
-		/**
-		 *  Get an embed_id
-		 *  @params Boolean (true = autoplay embed ; false = click-to-play embed)
-		 */
-		static function get_embed_id($ap = false) {
-			Grabpress::$api_key = get_option ( 'grabpress_key' );
-			Grabpress::$user_id = get_option ( 'grabpress_user_id' );
-			$embeds_data = self::call ( 'GET', '/embeds/?api_key=' . GrabPress::$api_key, array (), false );
+            $ctp_embed_data = array(
+                'embed' => array(
+                    'content_id' => $video_id,
+                    'content_type' => 'video',
+                    'owner_id' => Grabpress::$user_id,
+                    'label' => 'Default GrabPress Player (CTP)',
+                    'ad_server_id' => 5,
+                    'ad_key' => 'voxant',
+                    'ad_rules_url' => 'http://player.grabnetworks.com/ads/rules.json',
+                    'auto_play' => 'false',
+                    'width' => 600,
+                    'hieght' => 450,
+                    'skin_url' => 'swf/OSMFSkin.swf',
+                    'companion_id' => 'sidebar-top-ads',
+                    'companion_type' => 'floating',
+                    'javascript_namespace' => 'grabPlayerJS',
+                    'javascript_event_handler' => 'playerEventHandler',
+                    'ad_tier_name' => 'CMP',
+                    'ad_tier_id' => 2,
+                    'product_type_id' => $is_vip ? GP_VIP_PRODUCT_TYPE_ID : GP_PRODUCT_TYPE_ID
+                )
+            );
+            $ap_embed_data = array(
+                'embed' => array(
+                    'content_id' => $video_id,
+                    'content_type' => 'video',
+                    'owner_id' => Grabpress::$user_id,
+                    'label' => 'Default GrabPress Player (AP)',
+                    'ad_server_id' => 5,
+                    'ad_key' => 'voxant',
+                    'ad_rules_url' => 'http://player.grabnetworks.com/ads/rules.json',
+                    'auto_play' => 'true',
+                    'width' => 600,
+                    'hieght' => 450,
+                    'skin_url' => 'swf/OSMFSkin.swf',
+                    'companion_id' => 'sidebar-top-ads',
+                    'companion_type' => 'floating',
+                    'javascript_namespace' => 'grabPlayerJS',
+                    'javascript_event_handler' => 'playerEventHandler',
+                    'ad_tier_name' => 'CMP',
+                    'ad_tier_id' => 2,
+                    'product_type_id' => $is_vip ? GP_VIP_PRODUCT_TYPE_ID : GP_PRODUCT_TYPE_ID
+                )
+            );
+            try {
+                $embed_json_ctp = self::call('POST', '/embeds?api_key=' . GrabPress::$api_key . '&secure=yes', $ctp_embed_data, false);
+            } catch (Exception $e) {
+                // Log exception error message
+                Grabpress::message('API call exception: ' . $e->getMessage());
+            }
+            try {
+                $embed_json_ap = self::call('POST', '/embeds?api_key=' . GrabPress::$api_key . '&secure=yes', $ap_embed_data, false);
+            } catch (Exception $e) {
+                // Log exception error message
+                Grabpress::message('API call exception: ' . $e->getMessage());
+            }
+            GrabPress::log("EMBEDS CREATED FIRST UNIC TIME:" . $embed_json_ctp . "Auto Play:" . $embed_json_ap);
+            // Embeds successfully created
+            return true;
+        }
 
-			$result = json_decode ( $embeds_data );
-			$result_count = count ( $result );
-			for($i = 0; $i < $result_count; $i ++) {
-				$e_id = $result [$i]->embed->id;
-				$type = $result [$i]->embed->auto_play;
-				if ($type === $ap) {
-					return $e_id;
-				}
-			}
-		}
-		
+        /**
+         * Get the latest video from the catalog
+         * used for creating the embed
+         */
+        static function get_latest_video() {
+            $video_data = self::call('GET', '/catalogs/1/videos?limit=1', array(), false);
+            $result = json_decode($video_data, true);
+            return $result [0] ["video"] ["id"];
+        }
+
+        /**
+         *  Get an embed_id
+         *  @params Boolean (true = autoplay embed ; false = click-to-play embed)
+         */
+        static function get_embed_id($ap = null) {
+            Grabpress::$api_key = get_option('grabpress_key');
+            Grabpress::$user_id = get_option('grabpress_user_id');
+            $embeds_data = self::call('GET', '/embeds/?api_key=' . GrabPress::$api_key, array(), false);
+
+            $result = json_decode($embeds_data);
+
+
+
+            foreach ($result as $value) {
+
+                if ($ap === false && $value->embed->auto_play === false) {
+                    $e_id = $value->embed->id;
+                }
+                if ($ap === true && $value->embed->auto_play === true) {
+                    $e_id = $value->embed->id;
+                }
+            }
+            return $e_id;
+        }
+
         /**
          * Wrapper to soft delete a single user.
          * @param api_key integer, the api key.
@@ -451,8 +450,8 @@ if (!class_exists('Grabpress_API')) {
                     'providers' => $providers,
                     'categories' => $channels_list,
                 );
-/*                // Get submission template ID
-                $submission_template_id = self::get_shortcode_template_id();*/
+                /*                // Get submission template ID
+                  $submission_template_id = self::get_shortcode_template_id(); */
 
                 // Build post dat array
                 $post_data = array(
@@ -469,8 +468,7 @@ if (!class_exists('Grabpress_API')) {
                     $created_feed = self::call('POST', '/playlists?api_key=' . GrabPress::$api_key, $post_data, false);
                     $playlist_feed = json_decode($created_feed);
                     //Refresh It.
-                    $refresher = self::call('GET', '/playlists/'. $playlist_feed->playlist->id .'/refresh?api_key=' . GrabPress::$api_key, $post_data, false);
-
+                    $refresher = self::call('GET', '/playlists/' . $playlist_feed->playlist->id . '/refresh?api_key=' . GrabPress::$api_key, $post_data, false);
                 } catch (\Exception $e) {
                     Grabpress::$message = $e->getMessage();
                 }
@@ -494,7 +492,7 @@ if (!class_exists('Grabpress_API')) {
          * Edit feed on backend
          * @param  array $request Associative array containing request data
          */
-        static function edit_feed( $request ) {
+        static function edit_feed($request) {
             // Get feed ID from request
 
             $channels = $request['channels'];
@@ -503,35 +501,33 @@ if (!class_exists('Grabpress_API')) {
             $channels_list = implode(',', $channels);
             $feed_id = intval($request['feed_id']);
             // Generate channel URL to call
-                $search_parameters = array(
-                    'keywords_and' => $request['keywords_and'],
-                    'keywords_not' => $request['keywords_not'],
-                    'keywords_or' => $request['keywords_or'],
-                    'keywords_phrase' => $request['keywords_phrase'],
-                    'providers' =>  $request['providers'],
-                    'categories' => $request['channels']
-                );
-            
+            $search_parameters = array(
+                'keywords_and' => $request['keywords_and'],
+                'keywords_not' => $request['keywords_not'],
+                'keywords_or' => $request['keywords_or'],
+                'keywords_phrase' => $request['keywords_phrase'],
+                'providers' => $request['providers'],
+                'categories' => $request['channels']
+            );
+
             // Build PUT data array
-                $put_data = array(
-                    'playlist' => array(
-                        /*   'submission_template_id' => "$submission_template_id", */
-                        'description' => $request['name'],
-                        'refresh_interval' => 86400,
-                        'name' => $request['name'],
-                        'search_parameters' => json_encode($search_parameters)
-                    ),
-                );
+            $put_data = array(
+                'playlist' => array(
+                    /*   'submission_template_id' => "$submission_template_id", */
+                    'description' => $request['name'],
+                    'refresh_interval' => 86400,
+                    'name' => $request['name'],
+                    'search_parameters' => json_encode($search_parameters)
+                ),
+            );
             // Send feed data to backend and listen for response
-                try {
-                    $updated_feed = self::call('PUT', '/playlists/'. $feed_id .'?'.'api_key=' . GrabPress::$api_key, $put_data, false);
-                    $updated_feed_response = json_decode($updated_feed);
-                    return $updated_feed_response;
-
-                } catch (\Exception $e) {
-                    Grabpress::$message = $e->getMessage();
-                }
-
+            try {
+                $updated_feed = self::call('PUT', '/playlists/' . $feed_id . '?' . 'api_key=' . GrabPress::$api_key, $put_data, false);
+                $updated_feed_response = json_decode($updated_feed);
+                return $updated_feed_response;
+            } catch (\Exception $e) {
+                Grabpress::$message = $e->getMessage();
+            }
         }
 
         /**
@@ -542,7 +538,6 @@ if (!class_exists('Grabpress_API')) {
         static function filter_out_providers($provider) {
             return !$provider->provider->opt_out;
         }
-
 
         /**
          * Fetches channels from local 'cache' or backend
@@ -791,7 +786,6 @@ if (!class_exists('Grabpress_API')) {
             return $apiLocation;
         }
 
-
         /**
          * Get PHP config settings from php.ini
          * @return string Serialized PHP config settings
@@ -964,12 +958,12 @@ if (!class_exists('Grabpress_API')) {
          * @return string User data in JSON formatted string
          */
         static function get_user() {
-                $account_id = get_option('grabpress_account_id', '-1');
-                //Try to fetch current user by apikey and user id
-                $user_json = self::call('GET', '/accounts/'. $account_id .'/users/' . Grabpress::$user_id . '?api_key=' . Grabpress::$api_key, array(), true);
-                // Convert to PHP JSON object
-                $user_data = json_decode($user_json);
-      
+            $account_id = get_option('grabpress_account_id', '-1');
+            //Try to fetch current user by apikey and user id
+            $user_json = self::call('GET', '/accounts/' . $account_id . '/users/' . Grabpress::$user_id . '?api_key=' . Grabpress::$api_key, array(), true);
+            // Convert to PHP JSON object
+            $user_data = json_decode($user_json);
+
 
             // Return user data
             return $user_data;
@@ -1176,8 +1170,8 @@ if (!class_exists('Grabpress_API')) {
 
                     // If a validation error exists
                     if (isset($validate_data->error)) {
-                    	self::create_connection();
-                    	self::create_embeds();
+                        self::create_connection();
+                        self::create_embeds();
                     }
                     return true;
                 } catch (Exception $e) {
@@ -1217,7 +1211,6 @@ if (!class_exists('Grabpress_API')) {
 
                     // Fetch items from last submission
                     $submissions = 1; //self::get_items_from_last_submission($feed);
-
                     // Get health of feed based on # of submissions divided by posts per
                     // update
                     $feed->playlist->feed_health = $submissions / $feed->playlist->posts_per_update;
@@ -1233,56 +1226,56 @@ if (!class_exists('Grabpress_API')) {
         }
 
         /**
-        * Get all messages for the dashboard right panel
-        * @return A composibe array with (messages, pills)
-        **/
+         * Get all messages for the dashboard right panel
+         * @return A composibe array with (messages, pills)
+         * */
         static function get_all_dashboard_messages() {
 
-                $api_key = Grabpress::$api_key;
+            $api_key = Grabpress::$api_key;
 
-                // Fetch broadcast data
-                $str_get = '/messages?api_key=' . $api_key . '&message_type_id=1';
-                $broadcasts_json = self::call('GET', $str_get);
-                
-                // Fetch pills data
-                $str_get = '/messages?api_key=' . $api_key . '&message_type_id=2';
-                $fortune_cookies_json = self::call('GET', $str_get);
+            // Fetch broadcast data
+            $str_get = '/messages?api_key=' . $api_key . '&message_type_id=1';
+            $broadcasts_json = self::call('GET', $str_get);
 
-                // Fetch resources data
-                $str_get = '/messages?api_key=' . $api_key . '&message_type_id=3';
-                $resources_json = self::call('GET', $str_get);
+            // Fetch pills data
+            $str_get = '/messages?api_key=' . $api_key . '&message_type_id=2';
+            $fortune_cookies_json = self::call('GET', $str_get);
 
-                //User messages
-                $str_get = '/user_messages?api_key=' . $api_key;
-                $user_message_ids_json = self::call('GET', $str_get);
+            // Fetch resources data
+            $str_get = '/messages?api_key=' . $api_key . '&message_type_id=3';
+            $resources_json = self::call('GET', $str_get);
 
-                // Convert data to JSON objects
-                $broadcasts = json_decode($broadcasts_json);
-                $fortune_cookies = json_decode($fortune_cookies_json);
-                $resources = json_decode($resources_json);
-                $user_message_ids = json_decode($user_message_ids_json);
+            //User messages
+            $str_get = '/user_messages?api_key=' . $api_key;
+            $user_message_ids_json = self::call('GET', $str_get);
 
-                //For each message id, fetch message body...
-                $user_messages = array();
-                foreach($user_message_ids as $user_message_id) {
-                    $message_id = $user_message_id->user_message->message_id;
-                    $str_get = '/messages/' . $message_id . '?api_key=' . $api_key;
-                    $user_message_json = self::call('GET', $str_get);
-                    $user_message = json_decode($user_message_json);
-                    $body = $user_message->message->body;
-                    $user_messages[] = array( 'id'=> $message_id , 
-                                              'body'=> $body 
-                    );
-                }
+            // Convert data to JSON objects
+            $broadcasts = json_decode($broadcasts_json);
+            $fortune_cookies = json_decode($fortune_cookies_json);
+            $resources = json_decode($resources_json);
+            $user_message_ids = json_decode($user_message_ids_json);
 
-                //Return data in a composite array
-                $all_dashboard_messages = array( 
-                    'broadcasts' => $broadcasts,
-                    'fortune_cookies' => $fortune_cookies,
-                    'resources' => $resources,
-                    'user_messages' => $user_messages
+            //For each message id, fetch message body...
+            $user_messages = array();
+            foreach ($user_message_ids as $user_message_id) {
+                $message_id = $user_message_id->user_message->message_id;
+                $str_get = '/messages/' . $message_id . '?api_key=' . $api_key;
+                $user_message_json = self::call('GET', $str_get);
+                $user_message = json_decode($user_message_json);
+                $body = $user_message->message->body;
+                $user_messages[] = array('id' => $message_id,
+                    'body' => $body
                 );
-                return $all_dashboard_messages;
+            }
+
+            //Return data in a composite array
+            $all_dashboard_messages = array(
+                'broadcasts' => $broadcasts,
+                'fortune_cookies' => $fortune_cookies,
+                'resources' => $resources,
+                'user_messages' => $user_messages
+            );
+            return $all_dashboard_messages;
         }
 
         //
@@ -1301,8 +1294,6 @@ if (!class_exists('Grabpress_API')) {
             $count_new_videos = count($playlist_items);
             return $count_new_videos;
         }
-
-        
 
     }
 

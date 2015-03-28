@@ -3,7 +3,7 @@ Contributors: grabmedia
 Tags: video, grab, grabpress, grab media, grab-media, grab networks, rhythm one, rhythmone, rhythm new media, burst media, pre-roll, video catalog, media, video feed, video player, HTML5 video, video content, professional video, premium video, advertising, syndication, ad units, video widgets
 Requires at least: 3.7.1   
 Tested up to: 4.1.1  
-Stable tag: 3.0.1
+Stable tag: 3.0.2
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -116,8 +116,12 @@ No. All users are provided pertinent information for debugging and support purpo
 
 == Changelog ==  
 
+= 3.0.2 =
+
+*Bug Fixes:*
+ * GBPS-649	Embed ID is missing from the embed script in published posts from older versions of the plugin, preventing video players from rendering
+
 = 3.0.1 =
-*Features:*
 
 *Bug Fixes:*
  * GBPS-642	Published video posts are not showing any videos for old Autoposter posts
