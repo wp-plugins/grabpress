@@ -241,7 +241,7 @@ if (!class_exists('Grabpress_API')) {
          * @return boolean embeds successfully created
          */
         static function create_embeds() {
-            Grabpress::log("Entered create_embeds");
+            Grabpress::log("ATTENTION: CREATING NEW EMBEDS!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             Grabpress::$api_key = get_option('grabpress_key');
             Grabpress::$user_id = get_option('grabpress_user_id');
             $video_id = self::get_latest_video();
@@ -302,7 +302,14 @@ if (!class_exists('Grabpress_API')) {
                 // Log exception error message
                 Grabpress::message('API call exception: ' . $e->getMessage());
             }
-            GrabPress::log("EMBEDS CREATED FIRST UNIC TIME:" . $embed_json_ctp . "Auto Play:" . $embed_json_ap);
+            GrabPress::log("EMBEDS CREATED FIRST TIME CTP: " . $embed_json_ctp);
+            GrabPress::log("EMBEDS CREATED FIRST TIME AP : " . $embed_json_ap);
+            update_option('grabpress_ctp_embed_id','');
+            update_option('grabpress_ap_embed_id',''); 
+            self::get_embed_id(true);
+            self::get_embed_id(false);
+            Grabpress::log('ctp_embed_id => ' . get_option('grabpress_ctp_embed_id'));
+            Grabpress::log('ap_embed_id => ' . get_option('grabpress_ap_embed_id'));
             // Embeds successfully created
             return true;
         }
@@ -320,25 +327,54 @@ if (!class_exists('Grabpress_API')) {
         /**
          *  Get an embed_id
          *  @params Boolean (true = autoplay embed ; false = click-to-play embed)
-         */
-        static function get_embed_id($ap = null) {
-            Grabpress::$api_key = get_option('grabpress_key');
-            Grabpress::$user_id = get_option('grabpress_user_id');
-            $embeds_data = self::call('GET', '/embeds/?api_key=' . GrabPress::$api_key, array(), false);
-
-            $result = json_decode($embeds_data);
-
-
-
-            foreach ($result as $value) {
-
-                if ($ap === false && $value->embed->auto_play === false) {
-                    $e_id = $value->embed->id;
+         */ 
+        static function get_embed_id($ap) {
+            //Init
+            $tmp = '';
+            $e_id = false;
+            //get previously stored embed_ids
+            $ctp_embed_id = get_option('grabpress_ctp_embed_id');
+            $ap_embed_id = get_option('grabpress_ap_embed_id');           
+            //Check if embed_ids are locally stored already...
+            if($ctp_embed_id <> ''    && $ap_embed_id <> '' &&
+               $ctp_embed_id !== null && $ap_embed_id !== null ) {
+                if($ap === true) {
+                    $e_id = $ap_embed_id;
                 }
-                if ($ap === true && $value->embed->auto_play === true) {
-                    $e_id = $value->embed->id;
+                if($ap === false) {
+                    $e_id = $ctp_embed_id;
+                }
+            } else {
+                //If at least one of the embeds doesn't exist, then it request the remote server...
+                Grabpress::log(' --- RETRIEVING EMBED_ID FROM REMOTE SERVER. --- ');
+                //
+                Grabpress::$api_key = get_option('grabpress_key');
+                Grabpress::$user_id = get_option('grabpress_user_id');
+                //Request remote server
+                $embeds_data = self::call('GET', '/embeds/?api_key=' . GrabPress::$api_key, array(), false);
+                $result = json_decode($embeds_data);
+                //Get the most recent CTP 'or' the most recent AP
+                foreach ($result as $value) {
+                    if ($ap === false && $value->embed->auto_play === false) {
+                        $e_id = $value->embed->id;
+                    }
+                    if ($ap === true && $value->embed->auto_play === true) {
+                        $e_id = $value->embed->id;
+                    }
+                }
+                //Get the most recent CTP 'and' the most recent AP, then put then in the local storage
+                foreach ($result as $value) {
+                    if ($value->embed->auto_play === false) {
+                        $tmp = $value->embed->id;
+                        update_option('grabpress_ctp_embed_id', $tmp);
+                    }
+                    if ($value->embed->auto_play === true) {
+                        $tmp = $value->embed->id;
+                        update_option('grabpress_ap_embed_id', $tmp);
+                    }
                 }
             }
+            //Return selected embed id
             return $e_id;
         }
 
@@ -363,6 +399,8 @@ if (!class_exists('Grabpress_API')) {
                     if ($result->user) {
                         update_option('grabpress_key', '');
                         update_option('grabpress_user_id', '');
+                        update_option('grabpress_ctp_embed_id', '');
+                        update_option('grabpress_ap_embed_id', '');
                     }
                 } catch (Exception $e) {
                     // Log exception error message

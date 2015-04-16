@@ -156,14 +156,21 @@ if (!class_exists('Grabpress_Views')) {
                 $result_json = '';
                 // Call API and retrieve resulting JSON response
                 $result_json = Grabpress_API::call('POST', '/accounts/-1/users/create_with_payment_details?rkey=bbd608b4067f25888a43e63582fd096708d443da', $user_data, true);
+                Grabpress::log('$result_json => ' . $result_json);
+                if($result_json === 'Bad Request') {
+                    Grabpress::log('API call exception: Bad Request');
+                    Grabpress::$message = 'The process failed. Please, check that the email address is valid.';
+                    Grabpress::$error = Grabpress::$message;
+                    $params['action'] = 'create';
+                    return;
+                }
                 // Parse JSON response
                 $result_data = json_decode($result_json);
-
                 Grabpress::$user_id = $result_data->user->tokens[0]->user_id;
                 Grabpress::$api_key = $result_data->user->tokens[0]->access_key;
                 update_option('grabpress_key', $result_data->user->tokens[0]->access_key);
                 update_option('grabpress_user_id', $result_data->user->tokens[0]->user_id);
-
+                Grabpress_API::create_embeds();
             } catch (Exception $e) { // If API call is unsuccessful
                 // Log exception message
                 Grabpress::log('API call exception: ' . $e->getMessage());
@@ -172,6 +179,7 @@ if (!class_exists('Grabpress_Views')) {
               
             // If results has user
             if (isset($result_data->user)) {
+                Grabpress::log('Valid');
                 // Set action to 'link-user'
                 $params['action'] = 'link-user';
 
@@ -179,6 +187,7 @@ if (!class_exists('Grabpress_Views')) {
                 // Link account
                 /* Grabpress_Views::link_account ( $params ); */
             } else { // Else no user present
+                Grabpress::log('Invalid');
                 // Output already registered message to admin dashboard
                 Grabpress::$error = ( isset($result_data) ) ? 'We already have a registered user with the email address ' . $params['email'] . '. If you would like to update your account information, please login to the <a href="http://www.grab-media.com/publisherAdmin/">Grab Publisher Dashboard</a>, or contact our <a href="http://www.grab-media.com/support/">support</a> if you need assistance.' : '';
 
@@ -630,6 +639,8 @@ if (!class_exists('Grabpress_Views')) {
                     update_option('grabpress_user_id', $user->tokens[0]->user_id);
                     Grabpress::$user_id = $user->tokens[0]->user_id;
                     Grabpress::$api_key = $user->tokens[0]->access_key;
+                    update_option('grabpress_ctp_embed_id', Grabpress_API::get_embed_id(false));
+                    update_option('grabpress_ap_embed_id',  Grabpress_API::get_embed_id(true));
                 } else {
                     $linked = false; 
                     Grabpress::show_message();
@@ -640,6 +651,9 @@ if (!class_exists('Grabpress_Views')) {
                 $user = self::create_user($request);
                 if ($user->active) {
                       $linked = true; 
+                }  else {
+                    Grabpress::show_message();
+                    $linked = false; 
                 }
                
 
@@ -1240,6 +1254,7 @@ if (!class_exists('Grabpress_Views')) {
                         Grabpress::$api_key = $user_data->user->tokens[0]->access_key;
                         update_option('grabpress_key', $user_data->user->tokens[0]->access_key);
                         update_option('grabpress_user_id', $user_data->user->tokens[0]->user_id);
+                        Grabpress_API::create_embeds();
                     
                         // Get user from user data
                         $user = $user_data->user;
@@ -1524,17 +1539,11 @@ if (!class_exists('Grabpress_Views')) {
          * @param  array $params Associative array holding account information
          */
         static function unlink_account() {
-
             // If confirmed
-           
-          
                 // Try to unlink account - PUT to backend
                 try {
-          
                     $unlink_user =  Grabpress_API::create_connection();
-            
                     Grabpress_API::create_embeds();
-
                 } catch (Exception $e) { // If PUT is unsuccessful
                     // Log exception message
                     Grabpress::log('API call exception: ' . $e->getMessage());

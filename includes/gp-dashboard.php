@@ -222,6 +222,20 @@
 										<?php foreach ( $resources as $msg ) { ?>
 											<p><?php echo html_entity_decode( $msg->message->body, ENT_QUOTES, 'UTF-8' ); ?></p>
 										<?php }?>
+										<?php
+											if(Grabpress::$debug == true) {
+												echo 'grabpress_account_id => ' . get_option('grabpress_account_id');
+												echo '<br>';
+												echo 'grabpress_key => ' . get_option('grabpress_key');
+												echo '<br>';
+												echo 'grabpress_user_id => ' . get_option('grabpress_user_id');
+												echo '<br>';
+												echo 'grabpress_ctp_embed_id => ' . get_option('grabpress_ctp_embed_id');
+												echo '<br>';
+												echo 'grabpress_ap_embed_id => ' . get_option('grabpress_ap_embed_id');
+												echo '<br>';
+											}
+										?>
 									</div>
 								</div>
 							</div>
