@@ -32,7 +32,7 @@ if ( isset ($providers) && is_array($providers) ) {
 	// Try to fetch player data from API
 	try {
 
-		$player_id = Grabpress_API::get_embed_id(); 
+		$player_id = Grabpress_API::get_embed_id(false); 
 	} catch ( Exception $e ) {
 		// Log exception error message
 		Grabpress::log( 'API call exception: ' . $e->getMessage() );

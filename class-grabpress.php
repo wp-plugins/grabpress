@@ -4,7 +4,7 @@
  * Plugin Name: GrabPress
  * Plugin URI: http://www.grab-media.com/publisher/grabpress
  * Description: Configure GrabPress feeds to deliver fresh videos to your blog. Link a Grab Media Publisher account to get paid!
- * Version: 3.0.2
+ * Version: 3.0.3
  * Author: Grab Media
  * Author URI: http://www.grab-media.com
  * License: GPL2
@@ -64,8 +64,12 @@ if (!class_exists('Grabpress')) {
         static function init() {
             self::$api_key = get_option('grabpress_key');
             self::$user_id = get_option('grabpress_user_id');
+            //self::$ctp_embed_id = get_option('grabpress_ctp_embed_id');
+            //self::$ap_embed_id = get_option('grabpress_ap_embed_id');
             self::log('api_key => ' . self::$api_key);
             self::log('user_id => ' . self::$user_id);
+            //self::log('ctp_embed_id => ' . self::$ctp_embed_id);
+            //self::log('ap_embed_id => ' . self::$ap_embed_id);
         }
 
         /**
@@ -715,9 +719,6 @@ if (!class_exists('Grabpress')) {
          * @return string             Player and Google Analytics embed codes
          */
         static function gp_shortcode($attributes) {
-            // Try fetching attributes and settings for embedded player
-            $default_ctp_embed_id = 2053789;
-            $default_ap_embed_id = 1902479;
             try {
                 // Build supporte attributes array
 
@@ -747,12 +748,14 @@ if (!class_exists('Grabpress')) {
                     $embed_id = ( $auto_play === 'true' ) ? Grabpress_API::get_embed_id(true) : Grabpress_API::get_embed_id(false);
                 }
                 //Here, is the last chance to pick a default embed, based on user settings.
+                /*
                 if ($embed_id === false && $auto_play === 'false') {
                     $embed_id = $default_ctp_embed_id;
                 }
                 if ($embed_id === false && $auto_play === 'true') {
                     $embed_id = $default_ap_embed_id;
                 }
+                */
             } catch (Exception $e) { // If fetches unsuccessful
                 // Log exception error message
                 Grabpress::log('API call exception: ' . $e->getMessage());
@@ -1192,6 +1195,8 @@ if (!class_exists('Grabpress')) {
 
             // Validate API key
             Grabpress_API::validate_key();
+            Grabpress_API::get_embed_id(true);
+            Grabpress_API::get_embed_id(false);
         }
 
         /**
@@ -1260,26 +1265,11 @@ if (!class_exists('Grabpress')) {
             return $data;
         }
 
-        /**
-         * Set active flag in false.
-         * @return $user {Object}
-         */
-        static function delete_grabpress_user() {
-
-            $validate_json = Grabpress_API::call('DELETE', '/accounts/-1/users/' . Grabpress::$user_id . '?api_key=' . Grabpress::$api_key, array(), true);
-
-            $result = json_decode($validate_json);
-
-            if ($result->user) {
-                update_option('grabpress_key', '');
-                update_option('grabpress_user_id', '');
-            }
-            return $result->user;
-        }
-
         static function grabpress_deactivate() {
-
-            return self::delete_grabpress_user();
+            update_option('grabpress_key', '');
+            update_option('grabpress_user_id', '');
+            update_option('grabpress_ctp_embed_id', '');
+            update_option('grabpress_ap_embed_id', '');
         }
 
     }

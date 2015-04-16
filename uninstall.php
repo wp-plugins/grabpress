@@ -9,12 +9,16 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 $gp_key_option = 'grabpress_key';
 $gp_user_id_option = 'grabpress_user_id';
 $grabpress_login = 'grabpress';
+$grabpress_ctp = 'grabpress_ctp_embed_id';
+$grabpress_ap = 'grabpress_ap_embed_id';
 
 // Handle single site uninstall
 if ( ! is_multisite() ) {
 	// Remove GrabPress API key from WPDB
 	delete_option( $gp_key_option );
 	delete_option( $gp_user_id_option );
+	delete_option( $grabpress_ctp );
+	delete_option( $grabpress_ap );
 	// Check if 'grabpress' user exists in WPDB and delete it if it does
 	delete_user_by_login( $grabpress_login );
 } else { // Handle WP Multisite uninstall
@@ -30,8 +34,12 @@ if ( ! is_multisite() ) {
 	// API key and 'grabpress' user from WPDB
 	foreach ( $blog_ids as $blog_id ) {
 		switch_to_blog( $blog_id );
+		//
 		delete_site_option( $gp_key_option );
 		delete_site_option( $gp_user_id_option );
+		delete_site_option( $grabpress_ctp );
+		delete_site_option( $grabpress_ap );
+		//
 		delete_user_by_login( $grabpress_login );
 	}
 	// Switch back to original initiating blog
